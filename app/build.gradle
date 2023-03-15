@@ -23,7 +23,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -47,7 +47,7 @@ android {
     }
 }
 
-tasks.getByPath("preBuild").dependsOn("ktlintFormat")
+//tasks.getByPath("preBuild").dependsOn("ktlintFormat")
 
 ktlint {
     android = true
@@ -82,4 +82,16 @@ dependencies {
 
     // Splash Screen API
     implementation 'androidx.core:core-splashscreen:1.0.0'
+
+    // Pager - Google accompanist
+    implementation "com.google.accompanist:accompanist-pager:0.25.1"
+
+    // Collapse ToolBar
+    implementation "me.onebone:toolbar-compose:2.3.5"
+
+    // Coil
+    implementation "io.coil-kt:coil-compose:2.2.2"
+
+    // Zoomable Image
+    implementation 'com.github.re-ovo:ZoomableComposeImage:1.0.1'
 }

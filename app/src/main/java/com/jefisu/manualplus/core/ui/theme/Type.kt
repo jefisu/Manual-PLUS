@@ -1,4 +1,4 @@
-package com.jefisu.manualplus.ui.theme
+package com.jefisu.manualplus.core.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle

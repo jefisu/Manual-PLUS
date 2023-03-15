@@ -1,4 +1,4 @@
-package com.jefisu.manualplus.ui.theme
+package com.jefisu.manualplus.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -15,3 +15,9 @@ val dark_onError = Color(0xFF690005)
 
 val Background = Color(0xFFE6E1E6)
 val on_background = Color(0xFF252033)
+
+val light_placerholderColor = on_background.copy(0.6f)
+val dark_placerholderColor = Color.White.copy(0.6f)
+
+val light_background_text_field = Color(0xFFCFCFCF)
+val dark_background_text_field = Color(0xFF2C2935)

@@ -1,0 +1,53 @@
+{
+  ConstraintSets: {
+    start: {
+      logo: {
+        top: ['parent', 'top', 32],
+        centerHorizontally: 'parent',
+      },
+      containerSignUp: {
+        width: 'spread',
+        height: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['logo', 'bottom', 32],
+        bottom: ['parent', 'bottom'],
+      },
+      containerLogin: {
+        width: 'spread',
+        height: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['containerSignUp', 'top', 60],
+        bottom: ['parent', 'bottom'],
+      }
+    },
+    end: {
+      logo: {
+        top: ['parent', 'top', 32],
+        centerHorizontally: 'parent',
+      },
+      containerSignUp: {
+        width: 'spread',
+        height: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['logo', 'bottom', 32],
+        bottom: ['parent', 'bottom']
+      },
+      containerLogin: {
+        width: 'spread',
+        height: 70,
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        bottom: ['parent', 'bottom']
+      }
+    }
+  },
+  Transitions: {
+    default: {
+      from: 'start',
+      to: 'end'
+    }
+  }
+}

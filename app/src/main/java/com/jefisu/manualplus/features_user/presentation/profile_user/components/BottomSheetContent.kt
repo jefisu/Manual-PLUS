@@ -1,0 +1,79 @@
+package com.jefisu.manualplus.features_user.presentation.profile_user.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.jefisu.manualplus.R
+import com.jefisu.manualplus.core.components.CustomButton
+import com.jefisu.manualplus.core.ui.theme.spacing
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun BottomContentPattern(
+    title: String,
+    scope: CoroutineScope,
+    sheetState: ModalBottomSheetState,
+    onSaveClick: () -> Unit,
+    content: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    textButton: String = "Save",
+    height: Dp = 100.dp,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+            .padding(top = 20.dp, bottom = MaterialTheme.spacing.medium)
+            .then(modifier)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(start = 20.dp, end = 32.dp)
+        ) {
+            IconButton(onClick = { scope.launch { sheetState.hide() } }) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close_circle),
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onBackground,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.h5,
+                color = MaterialTheme.colors.onBackground
+            )
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            content()
+        }
+        CustomButton(
+            text = textButton,
+            buttonShape = RoundedCornerShape(8.dp),
+            modifier = Modifier.padding(horizontal = 32.dp),
+            onClick = onSaveClick
+        )
+    }
+}
