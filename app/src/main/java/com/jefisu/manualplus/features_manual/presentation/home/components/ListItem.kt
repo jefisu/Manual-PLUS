@@ -121,7 +121,7 @@ fun PreviewListItem() {
                 id = "",
                 instructions = (1..10).map {
                     "Lorem Ipsum is simply " +
-                            "dummy text of the printing and typesetting industry"
+                        "dummy text of the printing and typesetting industry"
                 },
                 timeForReading = 10
             )

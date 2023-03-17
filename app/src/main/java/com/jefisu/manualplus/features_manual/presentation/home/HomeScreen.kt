@@ -51,12 +51,14 @@ import com.jefisu.manualplus.core.ui.theme.spacing
 import com.jefisu.manualplus.features_manual.domain.Equipment
 import com.jefisu.manualplus.features_manual.domain.Instruction
 import com.jefisu.manualplus.features_manual.presentation.home.components.ListItem
+import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
 @OptIn(ExperimentalPagerApi::class)
+@Destination
 @Composable
 fun HomeScreen() {
     val pagerState = rememberPagerState()
@@ -85,7 +87,7 @@ fun HomeScreen() {
                 id = "",
                 instructions = (1..10).map {
                     "Lorem Ipsum is simply " +
-                            "dummy text of the printing and typesetting industry"
+                        "dummy text of the printing and typesetting industry"
                 },
                 timeForReading = 10
             )

@@ -57,7 +57,6 @@ import com.jefisu.manualplus.features_manual.domain.Equipment
 import com.jefisu.manualplus.features_manual.domain.Instruction
 import com.jefisu.manualplus.features_manual.presentation.home.components.EquipmentInfo
 
-
 @OptIn(ExperimentalMotionApi::class)
 @Composable
 fun DetailScreen(
@@ -81,7 +80,7 @@ fun DetailScreen(
         EquipmentInfo(equipment.category, R.drawable.ic_category)
     )
     val bottomInfo =
-        listOf("Read ${equipment.instruction.timeForReading.toString()} min", "Text", "Text")
+        listOf("Read ${equipment.instruction.timeForReading} min", "Text", "Text")
 
     MotionLayout(
         motionScene = MotionScene(content = motionScene),
@@ -211,7 +210,8 @@ fun DetailScreen(
                 .layoutId("seeMore")
                 .background(MaterialTheme.colors.background)
         ) {
-            Text(text = "See more",
+            Text(
+                text = "See more",
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onBackground,
                 fontWeight = FontWeight.Bold,
@@ -219,7 +219,8 @@ fun DetailScreen(
                     .align(Alignment.CenterEnd)
                     .padding(8.dp)
                     .clickable { animateToEnd = true }
-                    .padding(4.dp))
+                    .padding(4.dp)
+            )
         }
 
         Row(
@@ -288,9 +289,11 @@ fun PreviewDetailScreen() {
                     releaseYear = 2023,
                     category = "Ultrassom",
                     instruction = Instruction(
-                        id = "", instructions = (1..20).map {
+                        id = "",
+                        instructions = (1..20).map {
                             "Lorem Ipsum is simply " + "dummy text of the printing and typesetting industry"
-                        }, timeForReading = 10
+                        },
+                        timeForReading = 10
                     )
                 )
             )

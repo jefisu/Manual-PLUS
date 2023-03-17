@@ -27,7 +27,6 @@ import com.jefisu.manualplus.core.ui.theme.spacing
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BottomContentPattern(

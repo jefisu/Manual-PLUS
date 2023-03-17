@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -35,6 +37,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,9 +60,10 @@ fun CustomTextField(
     nameTextField: String,
     @DrawableRes iconView: Int,
     modifier: Modifier = Modifier,
-    readOnly: Boolean = false,
     isPassword: Boolean = false,
     isPrimaryColorBackground: Boolean = false,
+    imeAction: ImeAction = ImeAction.Default,
+    keyboardAction: () -> Unit = {},
 ) {
     val imeIsVisible = WindowInsets.isImeVisible
     val focusManager = LocalFocusManager.current
@@ -66,18 +71,15 @@ fun CustomTextField(
     var hasFocus by rememberSaveable { mutableStateOf(false) }
     val color =
         if (isPrimaryColorBackground) MaterialTheme.colors.background else MaterialTheme.colors.onBackground
-    val visualTransformation =
-        if (isPassword && showPassword) VisualTransformation.None else PasswordVisualTransformation()
-
-    LaunchedEffect(key1 = imeIsVisible) {
-        if (!imeIsVisible) {
-            hasFocus = false
-            focusManager.clearFocus()
-        }
+    val visualTransformation = when {
+        isPassword && showPassword -> VisualTransformation.None
+        isPassword -> PasswordVisualTransformation()
+        else -> VisualTransformation.None
     }
 
-    LaunchedEffect(key1 = hasFocus) {
-        if (readOnly && hasFocus) {
+    LaunchedEffect(imeIsVisible) {
+        if (!imeIsVisible) {
+            hasFocus = false
             focusManager.clearFocus()
         }
     }
@@ -97,9 +99,14 @@ fun CustomTextField(
             value = text,
             onValueChange = onTextChange,
             shape = RoundedCornerShape(8.dp),
-            readOnly = readOnly,
             visualTransformation = visualTransformation,
+            textStyle = TextStyle(fontSize = 12.sp),
+            keyboardActions = KeyboardActions { keyboardAction() },
+            keyboardOptions = KeyboardOptions(
+                imeAction = imeAction
+            ),
             colors = TextFieldDefaults.textFieldColors(
+                cursorColor = color,
                 textColor = color,
                 leadingIconColor = color,
                 trailingIconColor = color,
@@ -151,7 +158,8 @@ fun CustomTextField(
                                     else -> R.drawable.ic_close_circle
                                 }
                             ),
-                            contentDescription = "Icon action"
+                            contentDescription = "Icon action",
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }

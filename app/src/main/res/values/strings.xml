@@ -10,4 +10,7 @@
         <item>Light</item>
         <item>Dark</item>
     </string-array>
+    <string name="invalid_e_mail_or_password">Invalid e-mail or password</string>
+    <string name="email_already_used_by_another_user">Email already used by another user.</string>
+    <string name="you_re_offline_check_your_internet_connection">You\'re offline. Check your internet connection.</string>
 </resources>
