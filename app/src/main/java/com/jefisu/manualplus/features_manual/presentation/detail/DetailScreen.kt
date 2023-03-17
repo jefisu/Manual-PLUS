@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -105,7 +106,7 @@ fun DetailScreen(
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
                 contentDescription = null,
-                tint = navigationIconProp.color("color"),
+                tint = if (isSystemInDarkTheme()) navigationIconProp.color("darkColor") else navigationIconProp.color("lightColor"),
                 modifier = Modifier.size(31.dp)
             )
         }
@@ -127,7 +128,7 @@ fun DetailScreen(
         Text(
             text = equipment.name.uppercase(),
             style = MaterialTheme.typography.h5,
-            color = nameProp.color("textColor"),
+            color = if (isSystemInDarkTheme()) nameProp.color("darkTextColor") else nameProp.color("lightTextColor"),
             modifier = Modifier.layoutId(nameProp.id())
         )
         Column(

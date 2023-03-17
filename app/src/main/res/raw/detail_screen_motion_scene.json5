@@ -18,7 +18,8 @@
         top: ['parent', 'top', 12],
         translationZ: 0.1,
         custom: {
-          color: '#E6E1E6'
+          lightColor: '#E6E1E6',
+          darkColor: '#252033'
         }
       },
       image: {
@@ -33,7 +34,8 @@
         top: ['image', 'top', 8],
         translationZ: 0.1,
         custom: {
-          textColor: '#E6E1E6'
+          lightTextColor: '#E6E1E6',
+          darkTextColor: '#252033'
         }
       },
       infos: {
@@ -92,7 +94,8 @@
         top: ['parent', 'top', 12],
         translationZ: 0.1,
         custom: {
-          color: '#252033'
+          lightColor: '#252033',
+          darkColor: '#E6E1E6',
         }
       },
       image: {
@@ -107,7 +110,8 @@
         top: ['parent', 'top', 17],
         translationZ: 0.1,
         custom: {
-          textColor: '#252033'
+          lightTextColor: '#252033',
+          darkTextColor: '#E6E1E6'
         }
       },
       infos: {
