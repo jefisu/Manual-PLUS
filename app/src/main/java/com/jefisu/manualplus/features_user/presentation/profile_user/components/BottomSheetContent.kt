@@ -3,6 +3,7 @@ package com.jefisu.manualplus.features_user.presentation.profile_user.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -71,7 +72,7 @@ fun BottomContentPattern(
         CustomButton(
             text = textButton,
             buttonShape = RoundedCornerShape(8.dp),
-            modifier = Modifier.padding(horizontal = 32.dp),
+            padding = PaddingValues(horizontal = 32.dp),
             onClick = onSaveClick
         )
     }

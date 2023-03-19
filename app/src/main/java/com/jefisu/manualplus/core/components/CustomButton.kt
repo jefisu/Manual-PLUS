@@ -6,10 +6,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -35,6 +37,7 @@ fun CustomButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     @DrawableRes icon: Int? = null,
+    padding: PaddingValues = PaddingValues(),
     buttonShape: Shape = CircleShape,
     backgroundIsPrimary: Boolean = false,
     isLoading: Boolean = false
@@ -50,6 +53,7 @@ fun CustomButton(
         modifier = Modifier
             .fillMaxWidth()
             .height(44.dp)
+            .padding(padding)
             .clip(buttonShape)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
