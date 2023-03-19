@@ -1,6 +1,5 @@
 package com.jefisu.manualplus.features_manual.presentation.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +23,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,65 +34,46 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.ui.theme.ManualPLUSTheme
 import com.jefisu.manualplus.core.ui.theme.spacing
-import com.jefisu.manualplus.features_manual.domain.Equipment
-import com.jefisu.manualplus.features_manual.domain.Instruction
 import com.jefisu.manualplus.features_manual.presentation.home.components.ListItem
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
+import java.time.LocalTime
 
 @OptIn(ExperimentalPagerApi::class)
+@RootNavGraph(start = true)
 @Destination
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
+    val context = LocalContext.current
     var widthCategorySelected by remember { mutableStateOf(0.dp) }
     val collapseToolbarState = rememberCollapsingToolbarScaffoldState()
-    val categories = listOf(
-        "Ultrassom",
-        "Tomografia",
-        "Categorie 1",
-        "Categorie 2"
-    )
-    val categorySelected = categories[pagerState.currentPage]
-
-    val equipments = (1..10).map {
-        Equipment(
-            id = "",
-            name = "LOGIQ E9",
-            image = "",
-            description = "",
-            serialNumber = 56425,
-            releaseYear = 2023,
-            category = "Ultrassom",
-            instruction = Instruction(
-                id = "",
-                instructions = (1..10).map {
-                    "Lorem Ipsum is simply " +
-                        "dummy text of the printing and typesetting industry"
-                },
-                timeForReading = 10
-            )
-        )
-    }
 
     CollapsingToolbarScaffold(
         modifier = Modifier.fillMaxSize(),
@@ -114,7 +95,13 @@ fun HomeScreen() {
                             ) {
                                 append("Hi, ")
                             }
-                            append("good morning!")
+                            append(
+                                when (LocalTime.now().hour) {
+                                    in 6..11 -> "good morning"
+                                    in 12..17 -> "good afternoon"
+                                    else -> "good evening"
+                                } + "!"
+                            )
                         },
                         style = MaterialTheme.typography.h4,
                         color = MaterialTheme.colors.onBackground
@@ -125,8 +112,11 @@ fun HomeScreen() {
                             .clip(CircleShape)
                             .background(MaterialTheme.colors.primary)
                     ) {
-                        Image(
-                            painter = painterResource(R.drawable.artboards_diversity_avatars_by_netguru_16),
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(state.avatarUser)
+                                .crossfade(true)
+                                .build(),
                             contentDescription = null,
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
@@ -140,7 +130,7 @@ fun HomeScreen() {
                     item {
                         Spacer(modifier = Modifier.width(MaterialTheme.spacing.extraSmall))
                     }
-                    itemsIndexed(categories) { index, category ->
+                    itemsIndexed(state.categories) { index, category ->
                         val selected = pagerState.currentPage == index
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -177,15 +167,18 @@ fun HomeScreen() {
         }
     ) {
         HorizontalPager(
-            count = categories.size,
+            count = state.categories.size,
             state = pagerState
-        ) {
+        ) { currentPager ->
+            val categorySelected =
+                if (state.categories.isNotEmpty()) state.categories[currentPager] else ""
+
             LazyColumn {
                 item {
                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                 }
                 items(
-                    equipments.filter { it.category == categorySelected }
+                    state.equipments.filter { it.category == categorySelected }
                 ) { equipment ->
                     ListItem(
                         equipment = equipment,

@@ -28,7 +28,7 @@ object ValidateData {
             )
         }
         val containsLettersAndDigits = password.any { it.isDigit() } &&
-            password.any { it.isLetter() }
+                password.any { it.isLetter() }
         if (!containsLettersAndDigits) {
             return ValidationResult(
                 error = UiText.DynamicString("The password needs to contain at least one letter and digit")

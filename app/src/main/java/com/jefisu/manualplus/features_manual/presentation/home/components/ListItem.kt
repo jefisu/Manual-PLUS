@@ -1,7 +1,6 @@
 package com.jefisu.manualplus.features_manual.presentation.home.components
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,15 +18,24 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.ui.theme.spacing
+import com.jefisu.manualplus.core.util.fetchImageFromFirebase
 import com.jefisu.manualplus.features_manual.domain.Equipment
 import com.jefisu.manualplus.features_manual.domain.Instruction
 
@@ -47,6 +55,17 @@ fun ListItem(
         EquipmentInfo(equipment.releaseYear.toString(), R.drawable.ic_calendar),
         EquipmentInfo(equipment.category, R.drawable.ic_category)
     )
+    var imageURL by rememberSaveable { mutableStateOf("") }
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = Unit) {
+        if (equipment.image.isNotBlank()) {
+            fetchImageFromFirebase(
+                remotePath = equipment.image,
+                response = { uri -> imageURL = uri.toString() }
+            )
+        }
+    }
 
     Row(
         modifier = Modifier
@@ -61,8 +80,11 @@ fun ListItem(
                 .background(MaterialTheme.colors.primary)
                 .padding(12.dp)
         ) {
-            Image(
-                painter = painterResource(R.drawable.logiq_e9_removebg),
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(imageURL)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize()
             )
@@ -118,10 +140,9 @@ fun PreviewListItem() {
             releaseYear = 2023,
             category = "Ultrassom",
             instruction = Instruction(
-                id = "",
                 instructions = (1..10).map {
                     "Lorem Ipsum is simply " +
-                        "dummy text of the printing and typesetting industry"
+                            "dummy text of the printing and typesetting industry"
                 },
                 timeForReading = 10
             )

@@ -2,7 +2,7 @@ package com.jefisu.manualplus.core.util
 
 typealias SimpleResource = Resource<Unit>
 
-sealed class Resource<T> {
-    data class Success<T>(val data: T?) : Resource<T>()
-    data class Error<T>(val uiText: UiText) : Resource<T>()
+sealed class Resource<T>(val data: T? = null, val uiText: UiText? = null) {
+    class Success<T>(data: T?) : Resource<T>(data)
+    class Error<T>(uiText: UiText, data: T? = null) : Resource<T>(data, uiText)
 }

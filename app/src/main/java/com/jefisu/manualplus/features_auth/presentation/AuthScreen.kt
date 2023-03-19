@@ -52,26 +52,18 @@ import androidx.constraintlayout.compose.ExperimentalMotionApi
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.components.CustomButton
 import com.jefisu.manualplus.core.components.CustomTextField
 import com.jefisu.manualplus.core.ui.theme.ManualPLUSTheme
 import com.jefisu.manualplus.core.ui.theme.spacing
-import com.jefisu.manualplus.destinations.HomeScreenDestination
 import com.jefisu.manualplus.features_auth.presentation.components.GoogleButton
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
-import com.ramcosta.composedestinations.navigation.navigate
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMotionApi::class, ExperimentalMaterialApi::class)
-@RootNavGraph(start = true)
-@Destination
 @Composable
 fun AuthScreen(
-    navController: NavController,
+    navigateToHome: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val loginState by viewModel.loginState.collectAsState()
@@ -106,8 +98,7 @@ fun AuthScreen(
         }
         viewModel.navigateEvent.collect { canNavigate ->
             if (canNavigate) {
-                navController.backQueue.clear()
-                navController.navigate(HomeScreenDestination)
+                navigateToHome()
             }
         }
     }
@@ -310,9 +301,7 @@ fun AuthScreen(
 fun PreviewAuthScreen() {
     ManualPLUSTheme {
         Surface {
-            AuthScreen(
-                navController = rememberNavController()
-            )
+            AuthScreen(navigateToHome = { })
         }
     }
 }

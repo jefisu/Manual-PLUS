@@ -106,7 +106,9 @@ fun DetailScreen(
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
                 contentDescription = null,
-                tint = if (isSystemInDarkTheme()) navigationIconProp.color("darkColor") else navigationIconProp.color("lightColor"),
+                tint = if (isSystemInDarkTheme()) navigationIconProp.color("darkColor") else navigationIconProp.color(
+                    "lightColor"
+                ),
                 modifier = Modifier.size(31.dp)
             )
         }
@@ -290,7 +292,6 @@ fun PreviewDetailScreen() {
                     releaseYear = 2023,
                     category = "Ultrassom",
                     instruction = Instruction(
-                        id = "",
                         instructions = (1..20).map {
                             "Lorem Ipsum is simply " + "dummy text of the printing and typesetting industry"
                         },
