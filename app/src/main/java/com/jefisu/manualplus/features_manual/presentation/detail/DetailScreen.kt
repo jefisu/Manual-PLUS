@@ -2,7 +2,6 @@ package com.jefisu.manualplus.features_manual.presentation.detail
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,7 +27,6 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,23 +43,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ExperimentalMotionApi
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
+import coil.compose.AsyncImage
 import com.jefisu.manualplus.R
-import com.jefisu.manualplus.core.ui.theme.ManualPLUSTheme
 import com.jefisu.manualplus.core.ui.theme.spacing
 import com.jefisu.manualplus.features_manual.domain.Equipment
-import com.jefisu.manualplus.features_manual.domain.Instruction
 import com.jefisu.manualplus.features_manual.presentation.home.components.EquipmentInfo
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @OptIn(ExperimentalMotionApi::class)
+@Destination
 @Composable
 fun DetailScreen(
-    equipment: Equipment
+    equipment: Equipment,
+    imageURL: String,
+    navigator: DestinationsNavigator
 ) {
     var animateToEnd by rememberSaveable { mutableStateOf(false) }
     val progress by animateFloatAsState(
@@ -71,7 +72,9 @@ fun DetailScreen(
     )
     val context = LocalContext.current
     val motionScene = remember {
-        context.resources.openRawResource(R.raw.detail_screen_motion_scene).readBytes()
+        context.resources
+            .openRawResource(R.raw.detail_screen_motion_scene)
+            .readBytes()
             .decodeToString()
     }
 
@@ -81,7 +84,7 @@ fun DetailScreen(
         EquipmentInfo(equipment.category, R.drawable.ic_category)
     )
     val bottomInfo =
-        listOf("Read ${equipment.instruction.timeForReading} min", "Text", "Text")
+        listOf("Read 10 min", "Text", "Text")
 
     MotionLayout(
         motionScene = MotionScene(content = motionScene),
@@ -101,7 +104,8 @@ fun DetailScreen(
                 .background(MaterialTheme.colors.background)
         )
         IconButton(
-            onClick = { /*TODO*/ }, modifier = Modifier.layoutId(navigationIconProp.id())
+            onClick = navigator::navigateUp,
+            modifier = Modifier.layoutId(navigationIconProp.id())
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
@@ -121,8 +125,8 @@ fun DetailScreen(
                 .background(MaterialTheme.colors.primary)
                 .padding(12.dp)
         ) {
-            Image(
-                painter = painterResource(R.drawable.logiq_e9_removebg),
+            AsyncImage(
+                model = imageURL,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize()
             )
@@ -190,7 +194,7 @@ fun DetailScreen(
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
                 userScrollEnabled = progress == 1f
             ) {
-                itemsIndexed(equipment.instruction.instructions) { i, step ->
+                itemsIndexed(equipment.stepByStep) { i, step ->
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = "${i + 1}.",
@@ -273,32 +277,6 @@ fun DetailScreen(
                     )
                 }
             }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewDetailScreen() {
-    ManualPLUSTheme {
-        Surface {
-            DetailScreen(
-                equipment = Equipment(
-                    id = "",
-                    name = "LOGIQ E9",
-                    image = "",
-                    description = "Lorem Ipsum is simply dummy text of the printing and typese" + "tting industry. Lorem Ipsum has been the industry's standard dummy text e" + "ver since the 1500s, when an unknown printer took a galley of type and " + "scrambled it to make",
-                    serialNumber = 56425,
-                    releaseYear = 2023,
-                    category = "Ultrassom",
-                    instruction = Instruction(
-                        instructions = (1..20).map {
-                            "Lorem Ipsum is simply " + "dummy text of the printing and typesetting industry"
-                        },
-                        timeForReading = 10
-                    )
-                )
-            )
         }
     }
 }

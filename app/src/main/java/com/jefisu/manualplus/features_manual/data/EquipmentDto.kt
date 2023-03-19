@@ -1,7 +1,7 @@
 package com.jefisu.manualplus.features_manual.data
 
 import com.jefisu.manualplus.features_manual.domain.Equipment
-import com.jefisu.manualplus.features_manual.domain.Instruction
+import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.BsonObjectId
@@ -15,7 +15,7 @@ open class EquipmentDto : RealmObject {
     var serialNumber = 0
     var releaseYear = 0
     var category = ""
-    var instruction: Instruction = Instruction(instructions = emptyList(), timeForReading = 0)
+    var stepByStep = realmListOf<String>()
     var createdAt = System.currentTimeMillis()
 
     fun toEquipment() = Equipment(
@@ -26,6 +26,6 @@ open class EquipmentDto : RealmObject {
         serialNumber = serialNumber,
         releaseYear = releaseYear,
         category = category,
-        instruction = instruction
+        stepByStep = stepByStep
     )
 }

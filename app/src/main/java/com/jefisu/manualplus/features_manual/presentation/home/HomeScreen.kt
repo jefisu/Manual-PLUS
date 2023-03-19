@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,7 +39,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -48,11 +46,12 @@ import coil.request.ImageRequest
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.jefisu.manualplus.core.ui.theme.ManualPLUSTheme
 import com.jefisu.manualplus.core.ui.theme.spacing
+import com.jefisu.manualplus.features_manual.presentation.destinations.DetailScreenDestination
 import com.jefisu.manualplus.features_manual.presentation.home.components.ListItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
@@ -64,6 +63,7 @@ import java.time.LocalTime
 @Destination
 @Composable
 fun HomeScreen(
+    navigator: DestinationsNavigator,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -182,6 +182,9 @@ fun HomeScreen(
                 ) { equipment ->
                     ListItem(
                         equipment = equipment,
+                        onClickNavigate = { imageURL ->
+                            navigator.navigate(DetailScreenDestination(equipment, imageURL))
+                        },
                         modifier = Modifier.padding(
                             start = 12.dp,
                             end = 12.dp,
@@ -190,16 +193,6 @@ fun HomeScreen(
                     )
                 }
             }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewHomeScreen() {
-    ManualPLUSTheme {
-        Surface {
-            HomeScreen()
         }
     }
 }

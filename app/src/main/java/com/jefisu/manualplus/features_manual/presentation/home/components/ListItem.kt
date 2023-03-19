@@ -2,6 +2,7 @@ package com.jefisu.manualplus.features_manual.presentation.home.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +30,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -37,7 +37,6 @@ import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.ui.theme.spacing
 import com.jefisu.manualplus.core.util.fetchImageFromFirebase
 import com.jefisu.manualplus.features_manual.domain.Equipment
-import com.jefisu.manualplus.features_manual.domain.Instruction
 
 data class EquipmentInfo(
     val name: String,
@@ -47,6 +46,7 @@ data class EquipmentInfo(
 @Composable
 fun ListItem(
     equipment: Equipment,
+    onClickNavigate: (String) -> Unit,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.onBackground
 ) {
@@ -71,6 +71,7 @@ fun ListItem(
         modifier = Modifier
             .fillMaxWidth()
             .then(modifier)
+            .clickable { onClickNavigate(imageURL) }
     ) {
         Box(
             modifier = Modifier
@@ -125,27 +126,4 @@ fun ListItem(
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun PreviewListItem() {
-    ListItem(
-        equipment = Equipment(
-            id = "",
-            name = "LOGIQ E9",
-            image = "",
-            description = "",
-            serialNumber = 56425,
-            releaseYear = 2023,
-            category = "Ultrassom",
-            instruction = Instruction(
-                instructions = (1..10).map {
-                    "Lorem Ipsum is simply " +
-                            "dummy text of the printing and typesetting industry"
-                },
-                timeForReading = 10
-            )
-        )
-    )
 }

@@ -8,7 +8,7 @@ import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import com.jefisu.manualplus.core.ui.theme.ManualPLUSTheme
 import com.jefisu.manualplus.features_manual.domain.SyncRepository
-import com.jefisu.manualplus.features_manual.presentation.home.NavGraphs
+import com.jefisu.manualplus.features_manual.presentation.NavGraphs
 import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
