@@ -1,4 +1,4 @@
-package com.jefisu.manualplus.core.ui.theme
+package com.jefisu.manualplus.core.presentation.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

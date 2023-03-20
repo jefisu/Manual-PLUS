@@ -1,4 +1,4 @@
-package com.jefisu.manualplus.core.ui.theme
+package com.jefisu.manualplus.core.presentation.ui.theme
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable

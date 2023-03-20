@@ -46,8 +46,10 @@ import coil.request.ImageRequest
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.jefisu.manualplus.core.ui.theme.spacing
-import com.jefisu.manualplus.features_manual.presentation.destinations.DetailScreenDestination
+import com.jefisu.manualplus.core.presentation.SharedViewModel
+import com.jefisu.manualplus.core.presentation.ui.theme.spacing
+import com.jefisu.manualplus.destinations.DetailScreenDestination
+import com.jefisu.manualplus.destinations.ProfileUserScreenDestination
 import com.jefisu.manualplus.features_manual.presentation.home.components.ListItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
@@ -64,9 +66,11 @@ import java.time.LocalTime
 @Composable
 fun HomeScreen(
     navigator: DestinationsNavigator,
+    sharedViewModel: SharedViewModel,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val sharedState by sharedViewModel.state.collectAsState()
 
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
@@ -111,10 +115,11 @@ fun HomeScreen(
                             .size(50.dp)
                             .clip(CircleShape)
                             .background(MaterialTheme.colors.primary)
+                            .clickable { navigator.navigate(ProfileUserScreenDestination) }
                     ) {
                         AsyncImage(
                             model = ImageRequest.Builder(context)
-                                .data(state.avatarUser)
+                                .data(sharedState.avatarUri)
                                 .crossfade(true)
                                 .build(),
                             contentDescription = null,

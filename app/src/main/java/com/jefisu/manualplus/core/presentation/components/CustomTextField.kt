@@ -1,5 +1,6 @@
-package com.jefisu.manualplus.core.components
+package com.jefisu.manualplus.core.presentation.components
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -46,10 +47,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.jefisu.manualplus.R
-import com.jefisu.manualplus.core.ui.theme.ManualPLUSTheme
-import com.jefisu.manualplus.core.ui.theme.dark_placerholderColor
-import com.jefisu.manualplus.core.ui.theme.light_placerholderColor
-import com.jefisu.manualplus.core.ui.theme.spacing
+import com.jefisu.manualplus.core.presentation.ui.theme.ManualPLUSTheme
+import com.jefisu.manualplus.core.presentation.ui.theme.dark_placerholderColor
+import com.jefisu.manualplus.core.presentation.ui.theme.light_placerholderColor
+import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -191,7 +192,7 @@ fun PreviewCustomTextField() {
     }
 }
 
-@Preview
+@Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewPasswordTextField() {
     var text by remember { mutableStateOf("") }

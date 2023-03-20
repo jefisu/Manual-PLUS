@@ -1,4 +1,4 @@
-package com.jefisu.manualplus.core.components
+package com.jefisu.manualplus.core.presentation.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -29,7 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.jefisu.manualplus.core.ui.theme.spacing
+import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 
 @Composable
 fun CustomButton(

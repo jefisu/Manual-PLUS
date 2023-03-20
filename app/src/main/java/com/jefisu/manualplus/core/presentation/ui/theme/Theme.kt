@@ -1,4 +1,4 @@
-package com.jefisu.manualplus.core.ui.theme
+package com.jefisu.manualplus.core.presentation.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme

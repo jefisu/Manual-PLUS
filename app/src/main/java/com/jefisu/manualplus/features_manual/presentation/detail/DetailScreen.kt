@@ -50,7 +50,7 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import coil.compose.AsyncImage
 import com.jefisu.manualplus.R
-import com.jefisu.manualplus.core.ui.theme.spacing
+import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.features_manual.domain.Equipment
 import com.jefisu.manualplus.features_manual.presentation.home.components.EquipmentInfo
 import com.ramcosta.composedestinations.annotation.Destination

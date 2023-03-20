@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jefisu.manualplus.R
-import com.jefisu.manualplus.core.ui.theme.spacing
+import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.core.util.fetchImageFromFirebase
 import com.jefisu.manualplus.features_manual.domain.Equipment
 

@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.jefisu.manualplus.BuildConfig
 import com.jefisu.manualplus.R
-import com.jefisu.manualplus.core.components.CustomButton
+import com.jefisu.manualplus.core.presentation.components.CustomButton
 import com.jefisu.manualplus.core.util.Resource
 import com.jefisu.manualplus.core.util.UiText
 import com.stevdzasan.onetap.OneTapSignInWithGoogle

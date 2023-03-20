@@ -23,8 +23,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jefisu.manualplus.R
-import com.jefisu.manualplus.core.components.CustomButton
-import com.jefisu.manualplus.core.ui.theme.spacing
+import com.jefisu.manualplus.core.presentation.components.CustomButton
+import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

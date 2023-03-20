@@ -53,10 +53,10 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jefisu.manualplus.R
-import com.jefisu.manualplus.core.components.CustomButton
-import com.jefisu.manualplus.core.components.CustomTextField
-import com.jefisu.manualplus.core.ui.theme.ManualPLUSTheme
-import com.jefisu.manualplus.core.ui.theme.spacing
+import com.jefisu.manualplus.core.presentation.components.CustomButton
+import com.jefisu.manualplus.core.presentation.components.CustomTextField
+import com.jefisu.manualplus.core.presentation.ui.theme.ManualPLUSTheme
+import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.features_auth.presentation.components.GoogleButton
 import kotlinx.coroutines.launch
 
