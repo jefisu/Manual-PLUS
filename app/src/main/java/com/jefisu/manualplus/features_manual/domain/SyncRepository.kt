@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface SyncRepository {
 
-    fun configureRealm()
     fun getUser(): Flow<Resource<User>>
     fun getEquipments(): Flow<Resource<List<Equipment>>>
 }
