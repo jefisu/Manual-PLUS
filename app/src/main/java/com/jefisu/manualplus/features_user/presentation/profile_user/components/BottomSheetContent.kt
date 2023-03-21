@@ -37,6 +37,7 @@ fun BottomContentPattern(
     onSaveClick: () -> Unit,
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    onCloseClick: () -> Unit = {},
     textButton: String = "Save",
     height: Dp = 100.dp,
 ) {
@@ -52,7 +53,10 @@ fun BottomContentPattern(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = 20.dp, end = 32.dp)
         ) {
-            IconButton(onClick = { scope.launch { sheetState.hide() } }) {
+            IconButton(onClick = {
+                scope.launch { sheetState.hide() }
+                onCloseClick()
+            }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_close_circle),
                     contentDescription = null,

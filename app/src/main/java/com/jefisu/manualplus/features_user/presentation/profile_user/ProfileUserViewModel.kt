@@ -10,6 +10,7 @@ import com.jefisu.manualplus.core.util.Theme
 import com.jefisu.manualplus.core.util.UiText
 import com.jefisu.manualplus.core.util.getThemeSystem
 import com.jefisu.manualplus.features_user.presentation.domain.ProfileRepository
+import com.jefisu.manualplus.features_user.presentation.profile_user.util.SettingsUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.mongodb.App
 import kotlinx.coroutines.channels.Channel
@@ -33,9 +34,7 @@ class ProfileUserViewModel @Inject constructor(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    init {
-        getDefaultTheme()
-    }
+    private var currentTheme = getThemeSystem(prefs)
 
     fun enteredName(value: String) {
         _state.update { it.copy(name = value) }
@@ -45,14 +44,21 @@ class ProfileUserViewModel @Inject constructor(
         _state.update { it.copy(theme = theme) }
     }
 
-    fun getDefaultTheme() {
-        _state.update { it.copy(theme = getThemeSystem(prefs)) }
+    fun selectSetting(settings: SettingsUser) {
+        _state.update { it.copy(settings = settings) }
+    }
+
+    fun resetOptionThemeSelected() {
+        if (state.value.theme != currentTheme) {
+            _state.update { it.copy(theme = currentTheme) }
+        }
     }
 
     fun saveTheme() {
         prefs.edit()
             .putString(ManualConstants.THEME_ID, _state.value.theme.name)
             .apply()
+        currentTheme = _state.value.theme
         viewModelScope.launch {
             _uiEvent.send(UiEvent.HideBottomSheet)
         }

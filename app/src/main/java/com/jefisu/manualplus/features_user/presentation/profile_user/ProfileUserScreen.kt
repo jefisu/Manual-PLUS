@@ -4,39 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -91,7 +63,6 @@ fun ProfileUserScreen(
     val context = LocalContext.current
     val messageBarState = rememberMessageBarState()
     val focusManager = LocalFocusManager.current
-    var settingsClicked by remember { mutableStateOf(SettingsUser.Language) }
     var languageSelected by remember { mutableStateOf(languages.first()) }
 
     LaunchedEffect(key1 = viewModel.uiEvent) {
@@ -117,12 +88,12 @@ fun ProfileUserScreen(
             sheetState = sheetState,
             sheetElevation = 0.dp,
             sheetShape = RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp),
-            sheetBackgroundColor = if (settingsClicked == SettingsUser.Logout) Color.Transparent else MaterialTheme.colors.background,
+            sheetBackgroundColor = if (state.settings == SettingsUser.Logout) Color.Transparent else MaterialTheme.colors.background,
             sheetContent = {
-                when (settingsClicked) {
+                when (state.settings) {
                     SettingsUser.EditProfile -> {
                         BottomContentPattern(
-                            title = settingsClicked.value,
+                            title = state.settings.value,
                             scope = scope,
                             sheetState = sheetState,
                             height = 219.dp,
@@ -150,7 +121,7 @@ fun ProfileUserScreen(
 
                     SettingsUser.Language -> {
                         BottomContentPattern(
-                            title = settingsClicked.value,
+                            title = state.settings.value,
                             scope = scope,
                             sheetState = sheetState,
                             height = 229.dp,
@@ -174,7 +145,7 @@ fun ProfileUserScreen(
 
                     SettingsUser.ContactUs -> {
                         BottomContentPattern(
-                            title = settingsClicked.value,
+                            title = state.settings.value,
                             scope = scope,
                             sheetState = sheetState,
                             height = 396.dp,
@@ -220,7 +191,7 @@ fun ProfileUserScreen(
 
                     SettingsUser.Theme -> {
                         BottomContentPattern(
-                            title = settingsClicked.value,
+                            title = state.settings.value,
                             scope = scope,
                             sheetState = sheetState,
                             height = 268.dp,
@@ -228,6 +199,7 @@ fun ProfileUserScreen(
                                 viewModel.saveTheme()
                                 themeViewModel.selectTheme(state.theme)
                             },
+                            onCloseClick = viewModel::resetOptionThemeSelected,
                             content = {
                                 Column(
                                     verticalArrangement = Arrangement.Center,
@@ -389,7 +361,7 @@ fun ProfileUserScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                settingsClicked = setting
+                                viewModel.selectSetting(setting)
                                 scope.launch {
                                     sheetState.show()
                                 }
