@@ -86,7 +86,7 @@ class AuthViewModel @Inject constructor(
             val passwordResult = ValidateData.validatePassword(_loginState.value.password)
             val validationsResult = listOf(emailResult, passwordResult)
             if (validationsResult.any { it.error != null }) {
-                _error.update { validationsResult.firstOrNull()?.error }
+                _error.update { validationsResult.firstNotNullOf { it.error } }
                 _isLoading.update { false }
                 return@launch
             }
@@ -140,7 +140,7 @@ class AuthViewModel @Inject constructor(
             )
             val validationsResult = listOf(emailResult, passwordResult, repeatPasswordResult)
             if (validationsResult.any { it.error != null }) {
-                _error.update { validationsResult.firstOrNull()?.error }
+                _error.update { validationsResult.firstNotNullOf { it.error } }
                 _isLoading.update { false }
                 return@launch
             }
