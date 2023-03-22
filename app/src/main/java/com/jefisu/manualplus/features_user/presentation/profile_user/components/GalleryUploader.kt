@@ -47,7 +47,7 @@ fun GalleryUploader(
                 uri to imageType
             }
             pickedImages.addAll(pairs)
-            imagesSelected(pairs)
+            imagesSelected(pickedImages)
         }
     )
     var showImage by remember { mutableStateOf<Uri?>(null) }
