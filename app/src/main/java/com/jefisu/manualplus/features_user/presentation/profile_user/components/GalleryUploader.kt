@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
@@ -31,24 +30,13 @@ import me.rerere.zoomableimage.ZoomableImage
 
 @Composable
 fun GalleryUploader(
-    imagesSelected: (List<Pair<Uri, String>>) -> Unit,
+    pickedImages: List<Uri>,
+    onSelectImages: (List<Uri>) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val pickedImages = remember { mutableStateListOf<Pair<Uri, String>>() }
     val multiplePhotoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents(),
-        onResult = { uris ->
-            val pairs = uris.map { uri ->
-                val imageType = context.contentResolver
-                    .getType(uri)
-                    ?.split("/")
-                    ?.last() ?: "jpg"
-                uri to imageType
-            }
-            pickedImages.addAll(pairs)
-            imagesSelected(pickedImages)
-        }
+        onResult = onSelectImages
     )
     var showImage by remember { mutableStateOf<Uri?>(null) }
 
@@ -75,8 +63,9 @@ fun GalleryUploader(
                         Text(text = "Close")
                     }
                     Button(onClick = {
-                        pickedImages.removeIf { it.first == showImage }
-                        imagesSelected(pickedImages)
+                        onSelectImages(
+                            showImage!!.run(pickedImages::minus)
+                        )
                         showImage = null
                     }) {
                         Icon(
@@ -115,7 +104,7 @@ fun GalleryUploader(
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(pickedImages) { (uri, imageType) ->
+            items(pickedImages) { uri ->
                 AsyncImage(
                     model = uri,
                     contentDescription = null,

@@ -69,6 +69,7 @@ fun ProfileUserScreen(
                     messageBarState.addError(
                         Exception(event.uiText?.asString(context))
                     )
+                    sheetState.show()
                 }
                 is ProfileUserViewModel.UiEvent.SuccessMessage -> {
                     messageBarState.addSuccess(
@@ -193,8 +194,9 @@ fun ProfileUserScreen(
                                     )
                                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                                     GalleryUploader(
-                                        imagesSelected = viewModel::selectedImagesToUpload,
-                                        modifier = Modifier.padding(start = 32.dp)
+                                        modifier = Modifier.padding(start = 32.dp),
+                                        pickedImages = state.imagesToUpload,
+                                        onSelectImages = viewModel::selectedImagesToUpload
                                     )
                                 }
                             )

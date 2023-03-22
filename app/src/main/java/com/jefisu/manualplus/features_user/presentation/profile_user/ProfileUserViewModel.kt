@@ -1,5 +1,6 @@
 package com.jefisu.manualplus.features_user.presentation.profile_user
 
+import android.app.Application
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -9,14 +10,12 @@ import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.data.database.entity.FileToUploadEntity
 import com.jefisu.manualplus.core.domain.SharedRepository
 import com.jefisu.manualplus.core.util.*
+import com.jefisu.manualplus.features_user.presentation.domain.ImageUpload
 import com.jefisu.manualplus.features_user.presentation.domain.ProfileRepository
 import com.jefisu.manualplus.features_user.presentation.domain.SupportRequest
 import com.jefisu.manualplus.features_user.presentation.profile_user.util.SettingsUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.mongodb.App
-import java.io.IOException
-import java.util.*
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,13 +23,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.*
+import javax.inject.Inject
 
 @HiltViewModel
 class ProfileUserViewModel @Inject constructor(
     private val repository: ProfileRepository,
     private val app: App,
     private val prefs: SharedPreferences,
-    private val sharedRepository: SharedRepository
+    private val sharedRepository: SharedRepository,
+    private val application: Application
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileUserState())
@@ -40,6 +42,7 @@ class ProfileUserViewModel @Inject constructor(
     val uiEvent = _uiEvent.receiveAsFlow()
 
     private var currentTheme = getThemeSystem(prefs)
+    private var imageUploads = mutableListOf<ImageUpload>()
 
     fun enteredName(value: String) {
         _state.update { it.copy(name = value) }
@@ -65,8 +68,8 @@ class ProfileUserViewModel @Inject constructor(
         _state.update { it.copy(settings = settings) }
     }
 
-    fun selectedImagesToUpload(uris: List<Pair<Uri, String>>) {
-        _state.update { it.copy(imagesToUpload = uris) }
+    fun selectedImagesToUpload(uris: List<Uri>) {
+        _state.update { it.copy(imagesToUpload = it.imagesToUpload + uris) }
     }
 
     fun resetOptionThemeSelected() {
@@ -114,14 +117,6 @@ class ProfileUserViewModel @Inject constructor(
         }
     }
 
-//    fun sendSupportRequest() {
-//        viewModelScope.launch {
-//            _state.update { it.copy(isLoading = true) }
-//            delay(4000)
-//            _state.update { it.copy(isLoading = false) }
-//        }
-//    }
-
     fun sendSupportRequest() {
         viewModelScope.launch(Dispatchers.IO) {
             val areBlank = listOf(
@@ -140,14 +135,16 @@ class ProfileUserViewModel @Inject constructor(
                 problem = _state.value.supportMessage,
                 remotePathImages = emptyList()
             )
-            val filesPath = state.value.imagesToUpload.map { (uri, imageType) ->
+
+            _state.value.imagesToUpload.map { uri ->
+                val imageType = uri.extractImageType()
                 val remotePath =
                     "imagens/support_request/${supportRequest.id.toHexString()}/${UUID.randomUUID()}.$imageType"
-                uri to remotePath
-            }
+                ImageUpload(uri, remotePath)
+            }.also(imageUploads::addAll)
 
             val result = repository.addSupportRequest(
-                supportRequest.copy(remotePathImages = filesPath.map { it.second })
+                supportRequest.copy(remotePathImages = imageUploads.map { it.remotePath })
             )
             when (result) {
                 is Resource.Error -> {
@@ -156,40 +153,46 @@ class ProfileUserViewModel @Inject constructor(
                     )
                 }
                 is Resource.Success -> {
-                    uploadToFirebase(filesPath)
+                    uploadToFirebase()
                     _uiEvent.send(UiEvent.HideBottomSheet)
                     _uiEvent.send(
                         UiEvent.SuccessMessage(UiText.StringResource(R.string.support_request_registered_successfully))
                     )
+                    imageUploads.clear()
+                    enteredHospitalName("")
+                    enteredHospitalAddress("")
+                    enteredSupportMessage("")
+                    selectedImagesToUpload(emptyList())
                 }
             }
         }
     }
 
-    private fun uploadToFirebase(filesPath: List<Pair<Uri, String>>) {
-        val storage = FirebaseStorage.getInstance().reference
-        try {
-            filesPath.forEach { (uri, remotePath) ->
-                storage.child(remotePath)
-                    .putFile(uri)
-                    .addOnProgressListener { uploadTask ->
-                        val sessionUri = uploadTask.uploadSessionUri
-                        if (sessionUri != null) {
-                            viewModelScope.launch {
-                                sharedRepository.addFileToUpload(
-                                    FileToUploadEntity(
-                                        remotePath = remotePath,
-                                        fileUri = uri.toString(),
-                                        sessionUri = sessionUri.toString()
-                                    )
-                                )
-                            }
-                        }
+    private fun uploadToFirebase() {
+        val storage = FirebaseStorage.getInstance()
+        imageUploads.forEach { imageUpload ->
+            storage.uploadFile(
+                uri = imageUpload.uri,
+                remotePath = imageUpload.remotePath,
+                onFailure = { sessionUri ->
+                    val inputStream = application.contentResolver.openInputStream(imageUpload.uri)
+                    viewModelScope.launch {
+                        FileToUploadEntity(
+                            remotePath = imageUpload.remotePath,
+                            fileBytes = inputStream!!.readBytes(),
+                            sessionUri = sessionUri.toString()
+                        ).also { sharedRepository::addFileToUpload }
                     }
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
+                    inputStream?.close()
+                }
+            )
         }
+    }
+
+    private fun Uri.extractImageType(): String {
+        return application.contentResolver
+            .getType(this)
+            ?.substringAfter("/") ?: "jpg"
     }
 
     sealed class UiEvent {

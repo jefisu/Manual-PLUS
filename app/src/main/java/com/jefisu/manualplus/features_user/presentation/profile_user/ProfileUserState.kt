@@ -10,7 +10,7 @@ data class ProfileUserState(
     val supportMessage: String = "",
     val hospitalName: String = "",
     val hospitalAddress: String = "",
-    val imagesToUpload: List<Pair<Uri, String>> = emptyList(),
+    val imagesToUpload: List<Uri> = emptyList(),
     val theme: Theme = Theme.SystemDefault,
     val settings: SettingsUser = SettingsUser.EditProfile,
 )

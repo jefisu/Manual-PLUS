@@ -15,13 +15,13 @@ import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storageMetadata
 import com.jefisu.manualplus.core.data.MongoClient
 import com.jefisu.manualplus.core.data.database.FileToUploadDao
 import com.jefisu.manualplus.core.presentation.SharedViewModel
 import com.jefisu.manualplus.core.presentation.ThemeViewModel
 import com.jefisu.manualplus.core.presentation.ui.theme.ManualPLUSTheme
 import com.jefisu.manualplus.core.util.Theme
+import com.jefisu.manualplus.core.util.retryUploadFile
 import com.jefisu.manualplus.destinations.ProfileUserScreenDestination
 import com.jefisu.manualplus.features_user.presentation.profile_user.ProfileUserScreen
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -87,22 +87,19 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun cleanupCheck() {
-        val storage = FirebaseStorage.getInstance().reference
+        val storage = FirebaseStorage.getInstance()
         lifecycleScope.launch {
             fileToUploadDao
                 .getAllFileToUpload()
                 .forEach { imageFile ->
-                    storage.child(imageFile.remotePath)
-                        .putFile(
-                            imageFile.fileUri.toUri(),
-                            storageMetadata {},
-                            imageFile.sessionUri.toUri()
-                        )
-                        .addOnSuccessListener {
-                            launch {
-                                fileToUploadDao.deleteFileToUpload(imageFile)
-                            }
+                    storage.retryUploadFile(
+                        fileBytes = imageFile.fileBytes,
+                        remotePath = imageFile.remotePath,
+                        sessionUri = imageFile.sessionUri.toUri(),
+                        onSuccess = {
+                            launch { fileToUploadDao::deleteFileToUpload }
                         }
+                    )
                 }
         }
     }
