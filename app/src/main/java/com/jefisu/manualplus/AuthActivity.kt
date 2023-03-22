@@ -12,6 +12,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jefisu.manualplus.core.presentation.ThemeViewModel
 import com.jefisu.manualplus.core.presentation.ui.theme.ManualPLUSTheme
@@ -32,6 +33,7 @@ class AuthActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
 
         if (app.currentUser != null) {
             startActivity(Intent(this, MainActivity::class.java))
