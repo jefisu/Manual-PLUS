@@ -14,4 +14,6 @@
     <string name="title_activity_auth">AuthActivity</string>
     <string name="fields_can_t_be_blank">Fields can\'t be blank.</string>
     <string name="the_data_has_been_updated_successfully">The data has been updated successfully.</string>
+    <string name="failed_try_send_support_request">There was a problem trying to send your request. Please try again later.</string>
+    <string name="support_request_registered_successfully">Support request registered successfully</string>
 </resources>

@@ -67,7 +67,7 @@ android {
     }
 }
 
-//tasks.getByPath("preBuild").dependsOn("ktlintFormat")
+tasks.getByPath("preBuild").dependsOn("ktlintFormat")
 
 ktlint {
     android = true
@@ -132,6 +132,11 @@ dependencies {
     // Compose destinations
     implementation("io.github.raamcosta.compose-destinations:core:1.7.33-beta")
     ksp("io.github.raamcosta.compose-destinations:ksp:1.7.33-beta")
+
+    // Room components
+    implementation("androidx.room:room-runtime:2.5.0")
+    kapt("androidx.room:room-compiler:2.5.0")
+    implementation("androidx.room:room-ktx:2.5.0")
 
     // Timber
     implementation 'com.jakewharton.timber:timber:5.0.1'

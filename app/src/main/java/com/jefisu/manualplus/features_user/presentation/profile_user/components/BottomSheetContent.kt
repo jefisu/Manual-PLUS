@@ -1,14 +1,6 @@
 package com.jefisu.manualplus.features_user.presentation.profile_user.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -35,7 +27,7 @@ fun BottomContentPattern(
     scope: CoroutineScope,
     sheetState: ModalBottomSheetState,
     onSaveClick: () -> Unit,
-    content: @Composable () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
     onCloseClick: () -> Unit = {},
     textButton: String = "Save",
@@ -70,7 +62,7 @@ fun BottomContentPattern(
                 color = MaterialTheme.colors.onBackground
             )
         }
-        Box(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f)) {
             content()
         }
         CustomButton(

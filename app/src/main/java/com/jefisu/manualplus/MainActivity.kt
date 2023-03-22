@@ -11,8 +11,13 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storageMetadata
 import com.jefisu.manualplus.core.data.MongoClient
+import com.jefisu.manualplus.core.data.database.FileToUploadDao
 import com.jefisu.manualplus.core.presentation.SharedViewModel
 import com.jefisu.manualplus.core.presentation.ThemeViewModel
 import com.jefisu.manualplus.core.presentation.ui.theme.ManualPLUSTheme
@@ -23,11 +28,18 @@ import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.manualcomposablecalls.composable
 import com.ramcosta.composedestinations.navigation.dependency
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var fileToUploadDao: FileToUploadDao
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        cleanupCheck()
         MongoClient.configureRealm()
         setContent {
             val sharedViewModel = hiltViewModel<SharedViewModel>()
@@ -71,6 +83,27 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+        }
+    }
+
+    private fun cleanupCheck() {
+        val storage = FirebaseStorage.getInstance().reference
+        lifecycleScope.launch {
+            fileToUploadDao
+                .getAllFileToUpload()
+                .forEach { imageFile ->
+                    storage.child(imageFile.remotePath)
+                        .putFile(
+                            imageFile.fileUri.toUri(),
+                            storageMetadata {},
+                            imageFile.sessionUri.toUri()
+                        )
+                        .addOnSuccessListener {
+                            launch {
+                                fileToUploadDao.deleteFileToUpload(imageFile)
+                            }
+                        }
+                }
         }
     }
 }

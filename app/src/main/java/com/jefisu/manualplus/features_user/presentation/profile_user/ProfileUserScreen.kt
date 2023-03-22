@@ -1,9 +1,7 @@
 package com.jefisu.manualplus.features_user.presentation.profile_user
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,8 +27,6 @@ import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.SharedViewModel
 import com.jefisu.manualplus.core.presentation.ThemeViewModel
 import com.jefisu.manualplus.core.presentation.components.CustomTextField
-import com.jefisu.manualplus.core.presentation.ui.theme.dark_background_text_field
-import com.jefisu.manualplus.core.presentation.ui.theme.light_background_text_field
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.core.util.Theme
 import com.jefisu.manualplus.features_user.presentation.profile_user.components.BottomContentPattern
@@ -90,182 +86,194 @@ fun ProfileUserScreen(
             sheetShape = RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp),
             sheetBackgroundColor = if (state.settings == SettingsUser.Logout) Color.Transparent else MaterialTheme.colors.background,
             sheetContent = {
-                when (state.settings) {
-                    SettingsUser.EditProfile -> {
-                        BottomContentPattern(
-                            title = state.settings.value,
-                            scope = scope,
-                            sheetState = sheetState,
-                            height = 219.dp,
-                            onSaveClick = viewModel::saveInfoUpdated,
-                            content = {
-                                Column(
-                                    verticalArrangement = Arrangement.Center,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 32.dp)
-                                ) {
-                                    CustomTextField(
-                                        text = state.name,
-                                        onTextChange = viewModel::enteredName,
-                                        placeholderText = "John Doe",
-                                        nameTextField = "Name",
-                                        iconView = R.drawable.ic_user,
-                                        imeAction = ImeAction.Done,
-                                        keyboardAction = focusManager::clearFocus
-                                    )
-                                }
-                            }
-                        )
+                if (state.isLoading) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                    ) {
+                        CircularProgressIndicator(color = MaterialTheme.colors.onBackground)
                     }
-
-                    SettingsUser.Language -> {
-                        BottomContentPattern(
-                            title = state.settings.value,
-                            scope = scope,
-                            sheetState = sheetState,
-                            height = 229.dp,
-                            onSaveClick = { /*TODO*/ },
-                            content = {
-                                Column(
-                                    verticalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    languages.forEach { language ->
-                                        CustomRadioButton(
-                                            text = language,
-                                            selected = language == languageSelected,
-                                            onSelectChange = { languageSelected = language }
+                } else {
+                    when (state.settings) {
+                        SettingsUser.EditProfile -> {
+                            BottomContentPattern(
+                                title = state.settings.value,
+                                scope = scope,
+                                sheetState = sheetState,
+                                height = 219.dp,
+                                onSaveClick = viewModel::saveInfoUpdated,
+                                content = {
+                                    Column(
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 32.dp)
+                                    ) {
+                                        CustomTextField(
+                                            text = state.name,
+                                            onTextChange = viewModel::enteredName,
+                                            placeholderText = "John Doe",
+                                            nameTextField = "Name",
+                                            iconView = R.drawable.ic_user,
+                                            imeAction = ImeAction.Done,
+                                            keyboardAction = focusManager::clearFocus
                                         )
                                     }
                                 }
-                            }
-                        )
-                    }
-
-                    SettingsUser.ContactUs -> {
-                        BottomContentPattern(
-                            title = state.settings.value,
-                            scope = scope,
-                            sheetState = sheetState,
-                            height = 396.dp,
-                            textButton = "Send",
-                            onSaveClick = { /*TODO*/ },
-                            content = {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(
-                                        space = 12.dp,
-                                        alignment = Alignment.CenterVertically
-                                    ),
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
+                            )
+                        }
+                        SettingsUser.Language -> {
+                            BottomContentPattern(
+                                title = state.settings.value,
+                                scope = scope,
+                                sheetState = sheetState,
+                                height = 229.dp,
+                                onSaveClick = { /*TODO*/ },
+                                content = {
+                                    Column(
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        languages.forEach { language ->
+                                            CustomRadioButton(
+                                                text = language,
+                                                selected = language == languageSelected,
+                                                onSelectChange = { languageSelected = language }
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        SettingsUser.ContactUs -> {
+                            BottomContentPattern(
+                                title = state.settings.value,
+                                scope = scope,
+                                sheetState = sheetState,
+                                height = 521.dp,
+                                textButton = "Send",
+                                onSaveClick = viewModel::sendSupportRequest,
+                                content = {
+                                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
+                                    CustomTextField(
+                                        text = state.hospitalName,
+                                        onTextChange = viewModel::enteredHospitalName,
+                                        placeholderText = "Enter the name of your hospital",
+                                        nameTextField = "Hospital",
+                                        iconView = R.drawable.ic_hospital,
+                                        modifier = Modifier.padding(horizontal = 32.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
+                                    CustomTextField(
+                                        text = state.hospitalAddress,
+                                        onTextChange = viewModel::enteredHospitalAddress,
+                                        placeholderText = "233 Paulista Avenue, São Paulo, SP 01310-100",
+                                        nameTextField = "Address",
+                                        iconView = R.drawable.ic_location,
+                                        modifier = Modifier.padding(horizontal = 32.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                                     OutlinedTextField(
-                                        value = "",
-                                        onValueChange = { },
+                                        value = state.supportMessage,
+                                        onValueChange = viewModel::enteredSupportMessage,
                                         shape = RoundedCornerShape(16.dp),
                                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                                            backgroundColor = if (isSystemInDarkTheme()) dark_background_text_field else light_background_text_field,
+                                            backgroundColor = Color.Transparent,
                                             textColor = MaterialTheme.colors.onBackground,
-                                            focusedBorderColor = Color.Transparent,
-                                            unfocusedBorderColor = Color.Transparent
+                                            focusedBorderColor = MaterialTheme.colors.onBackground,
+                                            unfocusedBorderColor = MaterialTheme.colors.onBackground,
                                         ),
                                         placeholder = { Text(text = "Write your problem here...") },
                                         modifier = Modifier
                                             .padding(horizontal = 32.dp)
                                             .fillMaxWidth()
                                             .height(170.dp)
-                                            .border(
-                                                width = 1.dp,
-                                                color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled),
-                                                shape = RoundedCornerShape(16.dp)
-                                            )
                                     )
+                                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                                     GalleryUploader(
-                                        imagesSelected = { uris -> },
+                                        imagesSelected = viewModel::selectedImagesToUpload,
                                         modifier = Modifier.padding(start = 32.dp)
                                     )
                                 }
-                            }
-                        )
-                    }
-
-                    SettingsUser.Theme -> {
-                        BottomContentPattern(
-                            title = state.settings.value,
-                            scope = scope,
-                            sheetState = sheetState,
-                            height = 268.dp,
-                            onSaveClick = {
-                                viewModel.saveTheme()
-                                themeViewModel.selectTheme(state.theme)
-                            },
-                            onCloseClick = viewModel::resetOptionThemeSelected,
-                            content = {
-                                Column(
-                                    verticalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    Theme.values().forEach {
-                                        CustomRadioButton(
-                                            text = stringResource(id = it.res),
-                                            selected = state.theme == it,
-                                            onSelectChange = { viewModel.selectTheme(it) }
-                                        )
+                            )
+                        }
+                        SettingsUser.Theme -> {
+                            BottomContentPattern(
+                                title = state.settings.value,
+                                scope = scope,
+                                sheetState = sheetState,
+                                height = 268.dp,
+                                onSaveClick = {
+                                    viewModel.saveTheme()
+                                    themeViewModel.selectTheme(state.theme)
+                                },
+                                onCloseClick = viewModel::resetOptionThemeSelected,
+                                content = {
+                                    Column(
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Theme.values().forEach {
+                                            CustomRadioButton(
+                                                text = stringResource(id = it.res),
+                                                selected = state.theme == it,
+                                                onSelectChange = { viewModel.selectTheme(it) }
+                                            )
+                                        }
                                     }
                                 }
-                            }
-                        )
-                    }
-
-                    SettingsUser.Logout -> {
-                        Column(
-//                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier
-                                .padding(MaterialTheme.spacing.medium)
-                                .fillMaxWidth()
-                                .height(150.dp)
-                                .clip(RoundedCornerShape(MaterialTheme.spacing.medium))
-                                .background(MaterialTheme.colors.background)
-                                .padding(
-                                    horizontal = 32.dp,
-                                    vertical = MaterialTheme.spacing.medium
+                            )
+                        }
+                        SettingsUser.Logout -> {
+                            Column(
+                                modifier = Modifier
+                                    .padding(MaterialTheme.spacing.medium)
+                                    .fillMaxWidth()
+                                    .height(150.dp)
+                                    .clip(RoundedCornerShape(MaterialTheme.spacing.medium))
+                                    .background(MaterialTheme.colors.background)
+                                    .padding(
+                                        horizontal = 32.dp, vertical = MaterialTheme.spacing.medium
+                                    )
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.are_you_sure_you_want_sign_out),
+                                    style = MaterialTheme.typography.body1,
+                                    color = MaterialTheme.colors.onBackground
                                 )
-                        ) {
-                            Text(
-                                text = stringResource(R.string.are_you_sure_you_want_sign_out),
-                                style = MaterialTheme.typography.body1,
-                                color = MaterialTheme.colors.onBackground
-                            )
-                            Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
-                            Text(
-                                text = "Yes",
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.h6,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        viewModel.logout()
-                                        logout()
-                                    }
-                                    .padding(vertical = MaterialTheme.spacing.small)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(1.dp)
-                                    .background(MaterialTheme.colors.onBackground)
-                            )
-                            Text(
-                                text = "No",
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.h6,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        scope.launch { sheetState.hide() }
-                                    }
-                                    .padding(vertical = MaterialTheme.spacing.small)
-                            )
+                                Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
+                                Text(
+                                    text = "Yes",
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.h6,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            viewModel.logout()
+                                            logout()
+                                        }
+                                        .padding(vertical = MaterialTheme.spacing.small)
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(1.dp)
+                                        .background(MaterialTheme.colors.onBackground)
+                                )
+                                Text(
+                                    text = "No",
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.h6,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            scope.launch { sheetState.hide() }
+                                        }
+                                        .padding(vertical = MaterialTheme.spacing.small)
+                                )
+                            }
                         }
                     }
                 }
@@ -298,9 +306,7 @@ fun ProfileUserScreen(
                             ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(context)
-                                        .data(sharedState.avatarUri)
-                                        .crossfade(true)
-                                        .build(),
+                                        .data(sharedState.avatarUri).crossfade(true).build(),
                                     contentDescription = null,
                                     modifier = Modifier
                                         .align(Alignment.BottomCenter)
@@ -386,5 +392,4 @@ fun ProfileUserScreen(
             }
         }
     }
-
 }

@@ -3,8 +3,6 @@ package com.jefisu.manualplus.core.util
 import android.content.SharedPreferences
 import androidx.annotation.StringRes
 import com.jefisu.manualplus.R
-import kotlinx.coroutines.flow.update
-
 
 enum class Theme(@StringRes val res: Int) {
     SystemDefault(R.string.systemDefault),

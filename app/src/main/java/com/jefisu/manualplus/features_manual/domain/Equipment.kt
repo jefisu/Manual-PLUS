@@ -13,4 +13,4 @@ data class Equipment(
     val releaseYear: Int,
     val category: String,
     val stepByStep: List<String>
-): Parcelable
+) : Parcelable

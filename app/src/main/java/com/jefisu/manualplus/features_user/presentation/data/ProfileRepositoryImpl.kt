@@ -6,10 +6,10 @@ import com.jefisu.manualplus.core.util.Resource
 import com.jefisu.manualplus.core.util.SimpleResource
 import com.jefisu.manualplus.core.util.UiText
 import com.jefisu.manualplus.features_user.presentation.domain.ProfileRepository
+import com.jefisu.manualplus.features_user.presentation.domain.SupportRequest
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.mongodb.App
 import org.mongodb.kbson.BsonObjectId
-import timber.log.Timber
 
 class ProfileRepositoryImpl(
     app: App
@@ -32,7 +32,21 @@ class ProfileRepositoryImpl(
                 Resource.Success(Unit)
             }
         } catch (e: Exception) {
-            Timber.d("Error ${e.message}")
+            Resource.Error(UiText.unknownError())
+        }
+    }
+
+    override suspend fun addSupportRequest(supportRequest: SupportRequest): SimpleResource {
+        return try {
+            realm.write {
+                copyToRealm(
+                    supportRequest.toSupportRequestDto().apply {
+                        createdByUserId = user.id
+                    }
+                )
+            }
+            Resource.Success(Unit)
+        } catch (e: Exception) {
             Resource.Error(UiText.unknownError())
         }
     }

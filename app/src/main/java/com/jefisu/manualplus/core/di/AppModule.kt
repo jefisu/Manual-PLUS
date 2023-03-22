@@ -3,10 +3,13 @@ package com.jefisu.manualplus.core.di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.room.Room
 import com.jefisu.manualplus.BuildConfig
 import com.jefisu.manualplus.core.connectivity.ConnectivityObserver
 import com.jefisu.manualplus.core.connectivity.NetworkConnectivityObserver
 import com.jefisu.manualplus.core.data.SharedRepositoryImpl
+import com.jefisu.manualplus.core.data.database.FileDatabase
+import com.jefisu.manualplus.core.data.database.FileToUploadDao
 import com.jefisu.manualplus.core.domain.SharedRepository
 import com.jefisu.manualplus.features_manual.data.RealmManualRepository
 import com.jefisu.manualplus.features_manual.domain.ManualRepository
@@ -39,13 +42,23 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSharedRepository(app: App): SharedRepository {
-        return SharedRepositoryImpl(app)
+    fun provideSharedRepository(app: App, dao: FileToUploadDao): SharedRepository {
+        return SharedRepositoryImpl(app, dao)
     }
 
     @Provides
     @Singleton
     fun provideSharedPreferences(app: Application): SharedPreferences {
         return app.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFileDatabase(app: Application): FileToUploadDao {
+        return Room.databaseBuilder(
+            app,
+            FileDatabase::class.java,
+            "filesToUpload_db"
+        ).build().fileToUploadDao
     }
 }
