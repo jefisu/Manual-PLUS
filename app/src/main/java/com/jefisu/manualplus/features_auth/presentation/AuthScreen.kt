@@ -5,37 +5,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
@@ -70,6 +46,7 @@ fun AuthScreen(
     val signUpState by viewModel.signUpState.collectAsState()
     val error by viewModel.error.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isLoadingGoogle by viewModel.isLoadingGoogle.collectAsState()
 
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
@@ -144,27 +121,18 @@ fun AuthScreen(
                     .layoutId("logo")
                     .size(150.dp)
             )
-            Column(
-                modifier = Modifier
-                    .layoutId("containerSignUp")
-                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-                    .background(MaterialTheme.colors.primary)
-                    .clickable(enabled = !isLoading) {
-                        if (!animateToEnd) {
-                            animateToEnd = true
-                        }
-                    }
-                    .padding(top = 24.dp, start = 32.dp, end = 32.dp)
-            ) {
-                Text(
-                    text = "Sign Up",
-                    style = MaterialTheme.typography.h6,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colors.background
-                )
-                Column(
-                    modifier = Modifier.alpha(if (animateToEnd) 1f else 0f)
-                ) {
+            BodyClickable(
+                clickEnabled = progress == 0f,
+                backgroundColor = MaterialTheme.colors.primary,
+                onClick = { animateToEnd = !animateToEnd },
+                modifier = Modifier.layoutId("containerSignUp"),
+                content = {
+                    Text(
+                        text = "Sign Up",
+                        style = MaterialTheme.typography.h6,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.background
+                    )
                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                     CustomTextField(
                         text = signUpState.email,
@@ -175,6 +143,7 @@ fun AuthScreen(
                         isPrimaryColorBackground = true,
                         imeAction = ImeAction.Next,
                         keyboardAction = { focusManager.moveFocus(FocusDirection.Down) },
+                        readOnly = progress == 0f
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     CustomTextField(
@@ -187,6 +156,7 @@ fun AuthScreen(
                         isPassword = true,
                         imeAction = ImeAction.Next,
                         keyboardAction = { focusManager.moveFocus(FocusDirection.Down) },
+                        readOnly = progress == 0f
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     CustomTextField(
@@ -199,6 +169,7 @@ fun AuthScreen(
                         isPassword = true,
                         imeAction = ImeAction.Done,
                         keyboardAction = focusManager::clearFocus,
+                        readOnly = progress == 0f
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     CustomButton(
@@ -207,92 +178,120 @@ fun AuthScreen(
                         onClick = viewModel::signUp
                     )
                 }
-            }
-            Column(
-                modifier = Modifier
-                    .layoutId("containerLogin")
-                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-                    .background(MaterialTheme.colors.background)
-                    .clickable(enabled = !isLoading) {
-                        if (animateToEnd) {
-                            animateToEnd = false
-                        }
-                    }
-                    .padding(top = 24.dp, start = 32.dp, end = 32.dp)
-            ) {
-                Text(
-                    text = "Log In",
-                    style = MaterialTheme.typography.h6,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colors.onBackground
-                )
-                if (!animateToEnd) {
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
-                    CustomTextField(
-                        text = loginState.email,
-                        onTextChange = { viewModel.enteredEmail(it, isSigning = false) },
-                        placeholderText = "john.doe@example.com",
-                        nameTextField = "Email",
-                        iconView = R.drawable.ic_email,
-                        imeAction = ImeAction.Next,
-                        keyboardAction = { focusManager.moveFocus(FocusDirection.Down) },
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    CustomTextField(
-                        text = loginState.password,
-                        onTextChange = { viewModel.enteredPassword(it, isSigning = false) },
-                        nameTextField = "Password",
-                        isPassword = true,
-                        placeholderText = "Digit your password",
-                        iconView = R.drawable.ic_lock,
-                        imeAction = ImeAction.Done,
-                        keyboardAction = focusManager::clearFocus,
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
+            )
+            BodyClickable(
+                clickEnabled = progress == 1f,
+                backgroundColor = MaterialTheme.colors.background,
+                onClick = { animateToEnd = !animateToEnd },
+                modifier = Modifier.layoutId("containerLogin"),
+                content = {
                     Text(
-                        text = "Forgot Password?",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colors.onBackground,
-                        modifier = Modifier.align(Alignment.End)
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    CustomButton(
                         text = "Log In",
-                        isLoading = isLoading,
-                        onClick = viewModel::login
+                        style = MaterialTheme.typography.h6,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.onBackground
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(1.5.dp)
-                                .background(MaterialTheme.colors.onBackground)
+                    if (!animateToEnd) {
+                        Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
+                        CustomTextField(
+                            text = loginState.email,
+                            onTextChange = { viewModel.enteredEmail(it, isSigning = false) },
+                            placeholderText = "john.doe@example.com",
+                            nameTextField = "Email",
+                            iconView = R.drawable.ic_email,
+                            imeAction = ImeAction.Next,
+                            keyboardAction = { focusManager.moveFocus(FocusDirection.Down) }
                         )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        CustomTextField(
+                            text = loginState.password,
+                            onTextChange = { viewModel.enteredPassword(it, isSigning = false) },
+                            nameTextField = "Password",
+                            isPassword = true,
+                            placeholderText = "Digit your password",
+                            iconView = R.drawable.ic_lock,
+                            imeAction = ImeAction.Done,
+                            keyboardAction = focusManager::clearFocus
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "or",
-                            style = MaterialTheme.typography.body1,
+                            text = "Forgot Password?",
+                            fontSize = 12.sp,
                             color = MaterialTheme.colors.onBackground,
+                            modifier = Modifier.align(Alignment.End)
                         )
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(1.5.dp)
-                                .background(MaterialTheme.colors.onBackground)
+                        Spacer(modifier = Modifier.height(20.dp))
+                        CustomButton(
+                            text = "Log In",
+                            isLoading = isLoading,
+                            onClick = viewModel::login
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(1.5.dp)
+                                    .background(MaterialTheme.colors.onBackground)
+                            )
+                            Text(
+                                text = "or",
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.onBackground,
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(1.5.dp)
+                                    .background(MaterialTheme.colors.onBackground)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        GoogleButton(
+                            onResult = viewModel::loginWithGoogle,
+                            isLoading = isLoadingGoogle
                         )
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    GoogleButton(
-                        onResult = viewModel::loginWithGoogle,
-                        isLoading = isLoading && loginState.email.isBlank() && loginState.password.isBlank()
-                    )
                 }
-            }
+            )
         }
+    }
+}
+
+@Composable
+private fun BodyClickable(
+    clickEnabled: Boolean,
+    backgroundColor: Color,
+    onClick: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+            .background(backgroundColor)
+            .then(modifier)
+    ) {
+        Column(
+            content = content,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    top = 24.dp,
+                    start = 32.dp,
+                    end = 32.dp
+                )
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(if (clickEnabled) 1f else 0f)
+                .height(if (clickEnabled) 80.dp else 0.dp)
+                .clickable(onClick = onClick)
+        )
     }
 }
 

@@ -64,6 +64,7 @@ fun CustomTextField(
     isPassword: Boolean = false,
     isPrimaryColorBackground: Boolean = false,
     imeAction: ImeAction = ImeAction.Default,
+    readOnly: Boolean = false,
     keyboardAction: () -> Unit = {},
 ) {
     val imeIsVisible = WindowInsets.isImeVisible
@@ -99,6 +100,7 @@ fun CustomTextField(
         OutlinedTextField(
             value = text,
             onValueChange = onTextChange,
+            readOnly = readOnly,
             shape = RoundedCornerShape(8.dp),
             visualTransformation = visualTransformation,
             textStyle = TextStyle(fontSize = 12.sp),

@@ -10,12 +10,7 @@ import com.jefisu.manualplus.features_auth.presentation.util.ValidateData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -32,6 +27,9 @@ class AuthViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
+
+    private val _isLoadingGoogle = MutableStateFlow(false)
+    val isLoadingGoogle = _isLoadingGoogle.asStateFlow()
 
     private val _error = MutableStateFlow<UiText?>(null)
     val error = _error.asStateFlow()
@@ -110,7 +108,7 @@ class AuthViewModel @Inject constructor(
         when (tokenResult) {
             is Resource.Error -> _error.update { tokenResult.uiText }
             is Resource.Success -> {
-                _isLoading.update { true }
+                _isLoadingGoogle.update { true }
                 viewModelScope.launch {
                     val result = repository.loginGoogle(tokenResult.data!!)
                     if (result is Resource.Error) {
@@ -118,7 +116,7 @@ class AuthViewModel @Inject constructor(
                         return@launch
                     }
                     _navigateEvent.send(true)
-                    _isLoading.update { false }
+                    _isLoadingGoogle.update { false }
                 }
             }
         }
