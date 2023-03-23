@@ -16,6 +16,8 @@ import com.jefisu.manualplus.features_user.presentation.domain.SupportRequest
 import com.jefisu.manualplus.features_user.presentation.profile_user.util.SettingsUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.mongodb.App
+import java.util.*
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.*
-import javax.inject.Inject
 
 @HiltViewModel
 class ProfileUserViewModel @Inject constructor(

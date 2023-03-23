@@ -308,7 +308,9 @@ fun ProfileUserScreen(
                             ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(context)
-                                        .data(sharedState.avatarUri).crossfade(true).build(),
+                                        .data(sharedState.avatarUri)
+                                        .crossfade(true)
+                                        .build(),
                                     contentDescription = null,
                                     modifier = Modifier
                                         .align(Alignment.BottomCenter)

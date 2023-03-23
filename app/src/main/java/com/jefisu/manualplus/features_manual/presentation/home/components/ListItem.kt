@@ -1,29 +1,15 @@
 package com.jefisu.manualplus.features_manual.presentation.home.components
 
+import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +21,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
-import com.jefisu.manualplus.core.util.fetchImageFromFirebase
 import com.jefisu.manualplus.features_manual.domain.Equipment
 
 data class EquipmentInfo(
@@ -46,7 +31,8 @@ data class EquipmentInfo(
 @Composable
 fun ListItem(
     equipment: Equipment,
-    onClickNavigate: (String) -> Unit,
+    imageUri: Uri,
+    onClickNavigate: () -> Unit,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.onBackground
 ) {
@@ -55,23 +41,13 @@ fun ListItem(
         EquipmentInfo(equipment.releaseYear.toString(), R.drawable.ic_calendar),
         EquipmentInfo(equipment.category, R.drawable.ic_category)
     )
-    var imageURL by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
-
-    LaunchedEffect(key1 = Unit) {
-        if (equipment.image.isNotBlank()) {
-            fetchImageFromFirebase(
-                remotePath = equipment.image,
-                response = { uri -> imageURL = uri.toString() }
-            )
-        }
-    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .then(modifier)
-            .clickable { onClickNavigate(imageURL) }
+            .clickable { onClickNavigate() }
     ) {
         Box(
             modifier = Modifier
@@ -83,7 +59,7 @@ fun ListItem(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
-                    .data(imageURL)
+                    .data(imageUri)
                     .crossfade(true)
                     .build(),
                 contentDescription = null,

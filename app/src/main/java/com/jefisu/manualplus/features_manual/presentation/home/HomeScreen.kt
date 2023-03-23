@@ -183,12 +183,18 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                 }
                 items(
-                    state.equipments.filter { it.category == categorySelected }
-                ) { equipment ->
+                    state.equipments.filter { it.first.category == categorySelected }
+                ) { pairEquipment ->
                     ListItem(
-                        equipment = equipment,
-                        onClickNavigate = { imageURL ->
-                            navigator.navigate(DetailScreenDestination(equipment, imageURL))
+                        equipment = pairEquipment.first,
+                        imageUri = pairEquipment.second,
+                        onClickNavigate = {
+                            navigator.navigate(
+                                DetailScreenDestination(
+                                    pairEquipment.first,
+                                    pairEquipment.second.toString()
+                                )
+                            )
                         },
                         modifier = Modifier.padding(
                             start = 12.dp,

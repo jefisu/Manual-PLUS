@@ -5,10 +5,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storageMetadata
 import timber.log.Timber
 
-fun fetchImageFromFirebase(remotePath: String?, response: (Uri?) -> Unit) {
+fun fetchImageFromFirebase(remotePath: String?, response: (Uri) -> Unit) {
     if (remotePath == null) {
         Timber.d("Invalid remote path")
-        response(null)
         return
     }
     FirebaseStorage.getInstance()
@@ -16,11 +15,7 @@ fun fetchImageFromFirebase(remotePath: String?, response: (Uri?) -> Unit) {
         .child(remotePath)
         .downloadUrl
         .addOnSuccessListener {
-            Timber.d("downloadURL: $it")
             response(it)
-        }
-        .addOnFailureListener {
-            Timber.d("downloadURL error: ${it.message}")
         }
 }
 
