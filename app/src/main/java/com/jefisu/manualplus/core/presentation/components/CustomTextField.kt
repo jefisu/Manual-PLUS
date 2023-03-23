@@ -101,6 +101,7 @@ fun CustomTextField(
             value = text,
             onValueChange = onTextChange,
             readOnly = readOnly,
+            maxLines = 1,
             shape = RoundedCornerShape(8.dp),
             visualTransformation = visualTransformation,
             textStyle = TextStyle(fontSize = 12.sp),

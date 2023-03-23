@@ -21,25 +21,30 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ExperimentalMotionApi
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.CustomButton
 import com.jefisu.manualplus.core.presentation.components.CustomTextField
-import com.jefisu.manualplus.core.presentation.ui.theme.ManualPLUSTheme
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
+import com.jefisu.manualplus.destinations.HomeScreenDestination
 import com.jefisu.manualplus.features_auth.presentation.components.GoogleButton
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.navigate
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMotionApi::class, ExperimentalMaterialApi::class)
+@RootNavGraph(start = true)
+@Destination
 @Composable
 fun AuthScreen(
-    navigateToHome: () -> Unit,
+    navController: NavController,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val loginState by viewModel.loginState.collectAsState()
@@ -75,7 +80,8 @@ fun AuthScreen(
         }
         viewModel.navigateEvent.collect { canNavigate ->
             if (canNavigate) {
-                navigateToHome()
+                navController.backQueue.clear()
+                navController.navigate(HomeScreenDestination)
             }
         }
     }
@@ -292,15 +298,5 @@ private fun BodyClickable(
                 .height(if (clickEnabled) 80.dp else 0.dp)
                 .clickable(onClick = onClick)
         )
-    }
-}
-
-@Preview
-@Composable
-fun PreviewAuthScreen() {
-    ManualPLUSTheme {
-        Surface {
-            AuthScreen(navigateToHome = { })
-        }
     }
 }

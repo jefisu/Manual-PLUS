@@ -3,7 +3,7 @@ package com.jefisu.manualplus.features_manual.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jefisu.manualplus.core.util.fetchImageFromFirebase
-import com.jefisu.manualplus.features_manual.domain.ManualRepository
+import com.jefisu.manualplus.features_manual.domain.SyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    manualRepository: ManualRepository
+    syncRepository: SyncRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -21,7 +21,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            manualRepository.getEquipments().collect { result ->
+            syncRepository.getEquipments().collect { result ->
                 result.data?.forEach { equipment ->
                     fetchImageFromFirebase(equipment.image) { uri ->
                         _state.update {
