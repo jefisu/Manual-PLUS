@@ -1,13 +1,6 @@
 <resources>
     <string name="app_name">Manual PLUS</string>
     <string name="are_you_sure_you_want_sign_out">Are you sure you want Sign Out?</string>
-    <string-array name="languages">
-        <item>English</item>
-        <item>Portuguese</item>
-    </string-array>
-    <string name="systemDefault">System default</string>
-    <string name="light">Light</string>
-    <string name="dark">Dark</string>
     <string name="invalid_e_mail_or_password">Invalid e-mail or password</string>
     <string name="email_already_used_by_another_user">Email already used by another user.</string>
     <string name="you_re_offline_check_your_internet_connection">You\'re offline. Check your internet connection.</string>

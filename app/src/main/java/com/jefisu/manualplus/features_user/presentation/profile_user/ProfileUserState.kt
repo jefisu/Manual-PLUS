@@ -1,7 +1,6 @@
 package com.jefisu.manualplus.features_user.presentation.profile_user
 
 import android.net.Uri
-import com.jefisu.manualplus.core.util.Theme
 import com.jefisu.manualplus.features_user.presentation.profile_user.util.SettingsUser
 
 data class ProfileUserState(
@@ -11,6 +10,5 @@ data class ProfileUserState(
     val hospitalName: String = "",
     val hospitalAddress: String = "",
     val imagesToUpload: List<Uri> = emptyList(),
-    val theme: Theme = Theme.SystemDefault,
     val settings: SettingsUser = SettingsUser.EditProfile,
 )

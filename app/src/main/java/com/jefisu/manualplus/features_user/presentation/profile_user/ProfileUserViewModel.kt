@@ -1,7 +1,6 @@
 package com.jefisu.manualplus.features_user.presentation.profile_user
 
 import android.app.Application
-import android.content.SharedPreferences
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +8,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.data.database.entity.FileToUploadEntity
 import com.jefisu.manualplus.core.domain.SharedRepository
-import com.jefisu.manualplus.core.util.*
+import com.jefisu.manualplus.core.util.Resource
+import com.jefisu.manualplus.core.util.UiText
+import com.jefisu.manualplus.core.util.uploadFile
 import com.jefisu.manualplus.features_user.presentation.domain.ImageUpload
 import com.jefisu.manualplus.features_user.presentation.domain.ProfileRepository
 import com.jefisu.manualplus.features_user.presentation.domain.SupportRequest
@@ -30,7 +31,6 @@ import kotlinx.coroutines.launch
 class ProfileUserViewModel @Inject constructor(
     private val repository: ProfileRepository,
     private val app: App,
-    private val prefs: SharedPreferences,
     private val sharedRepository: SharedRepository,
     private val application: Application
 ) : ViewModel() {
@@ -41,7 +41,6 @@ class ProfileUserViewModel @Inject constructor(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    private var currentTheme = getThemeSystem(prefs)
     private var imageUploads = mutableListOf<ImageUpload>()
 
     fun enteredName(value: String) {
@@ -60,32 +59,12 @@ class ProfileUserViewModel @Inject constructor(
         _state.update { it.copy(supportMessage = value) }
     }
 
-    fun selectTheme(theme: Theme) {
-        _state.update { it.copy(theme = theme) }
-    }
-
     fun selectSetting(settings: SettingsUser) {
         _state.update { it.copy(settings = settings) }
     }
 
     fun selectedImagesToUpload(uris: List<Uri>) {
         _state.update { it.copy(imagesToUpload = it.imagesToUpload + uris) }
-    }
-
-    fun resetOptionThemeSelected() {
-        if (state.value.theme != currentTheme) {
-            _state.update { it.copy(theme = currentTheme) }
-        }
-    }
-
-    fun saveTheme() {
-        prefs.edit()
-            .putString(ManualConstants.THEME_ID, _state.value.theme.name)
-            .apply()
-        currentTheme = _state.value.theme
-        viewModelScope.launch {
-            _uiEvent.send(UiEvent.HideBottomSheet)
-        }
     }
 
     fun saveInfoUpdated() {

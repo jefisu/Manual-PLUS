@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -25,12 +24,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.SharedViewModel
-import com.jefisu.manualplus.core.presentation.ThemeViewModel
 import com.jefisu.manualplus.core.presentation.components.CustomTextField
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
-import com.jefisu.manualplus.core.util.Theme
 import com.jefisu.manualplus.features_user.presentation.profile_user.components.BottomContentPattern
-import com.jefisu.manualplus.features_user.presentation.profile_user.components.CustomRadioButton
 import com.jefisu.manualplus.features_user.presentation.profile_user.components.GalleryUploader
 import com.jefisu.manualplus.features_user.presentation.profile_user.util.SettingsUser
 import com.ramcosta.composedestinations.annotation.Destination
@@ -46,20 +42,16 @@ fun ProfileUserScreen(
     logout: () -> Unit,
     navigator: DestinationsNavigator,
     sharedViewModel: SharedViewModel,
-    themeViewModel: ThemeViewModel,
     viewModel: ProfileUserViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val sharedState by sharedViewModel.state.collectAsState()
-
-    val languages = stringArrayResource(R.array.languages)
 
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val messageBarState = rememberMessageBarState()
     val focusManager = LocalFocusManager.current
-    var languageSelected by remember { mutableStateOf(languages.first()) }
 
     LaunchedEffect(key1 = viewModel.uiEvent) {
         viewModel.uiEvent.collect { event ->
@@ -125,29 +117,6 @@ fun ProfileUserScreen(
                                 }
                             )
                         }
-                        SettingsUser.Language -> {
-                            BottomContentPattern(
-                                title = state.settings.value,
-                                scope = scope,
-                                sheetState = sheetState,
-                                height = 229.dp,
-                                onSaveClick = { /*TODO*/ },
-                                content = {
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                        languages.forEach { language ->
-                                            CustomRadioButton(
-                                                text = language,
-                                                selected = language == languageSelected,
-                                                onSelectChange = { languageSelected = language }
-                                            )
-                                        }
-                                    }
-                                }
-                            )
-                        }
                         SettingsUser.ContactUs -> {
                             BottomContentPattern(
                                 title = state.settings.value,
@@ -198,33 +167,6 @@ fun ProfileUserScreen(
                                         pickedImages = state.imagesToUpload,
                                         onSelectImages = viewModel::selectedImagesToUpload
                                     )
-                                }
-                            )
-                        }
-                        SettingsUser.Theme -> {
-                            BottomContentPattern(
-                                title = state.settings.value,
-                                scope = scope,
-                                sheetState = sheetState,
-                                height = 268.dp,
-                                onSaveClick = {
-                                    viewModel.saveTheme()
-                                    themeViewModel.selectTheme(state.theme)
-                                },
-                                onCloseClick = viewModel::resetOptionThemeSelected,
-                                content = {
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                        Theme.values().forEach {
-                                            CustomRadioButton(
-                                                text = stringResource(id = it.res),
-                                                selected = state.theme == it,
-                                                onSelectChange = { viewModel.selectTheme(it) }
-                                            )
-                                        }
-                                    }
                                 }
                             )
                         }
