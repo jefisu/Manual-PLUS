@@ -50,6 +50,7 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import coil.compose.AsyncImage
 import com.jefisu.manualplus.R
+import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.features_manual.domain.Equipment
 import com.jefisu.manualplus.features_manual.presentation.home.components.EquipmentInfo
@@ -122,7 +123,7 @@ fun DetailScreen(
                 .width(155.dp)
                 .height(194.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colors.primary)
+                .background(light_Primary)
                 .padding(12.dp)
         ) {
             AsyncImage(

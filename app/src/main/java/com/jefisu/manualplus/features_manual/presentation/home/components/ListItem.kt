@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jefisu.manualplus.R
+import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.features_manual.domain.Equipment
 
@@ -54,7 +55,7 @@ fun ListItem(
                 .width(155.dp)
                 .height(194.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colors.primary)
+                .background(light_Primary)
                 .padding(12.dp)
         ) {
             AsyncImage(

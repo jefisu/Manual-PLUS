@@ -28,6 +28,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.CustomTextField
+import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.destinations.AuthScreenDestination
 import com.jefisu.manualplus.features_manual.presentation.SharedState
@@ -256,7 +257,7 @@ fun ProfileUserScreen(
                                 modifier = Modifier
                                     .size(100.dp)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colors.primary)
+                                    .background(light_Primary)
                             ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(context)

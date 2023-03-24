@@ -30,6 +30,7 @@ import coil.request.ImageRequest
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.destinations.DetailScreenDestination
 import com.jefisu.manualplus.destinations.ProfileUserScreenDestination
@@ -37,11 +38,11 @@ import com.jefisu.manualplus.features_manual.presentation.SharedState
 import com.jefisu.manualplus.features_manual.presentation.home.components.ListItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import java.time.LocalTime
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
-import java.time.LocalTime
 
 @OptIn(ExperimentalPagerApi::class)
 @Destination
@@ -107,7 +108,7 @@ fun HomeScreen(
                         modifier = Modifier
                             .size(50.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colors.primary)
+                            .background(light_Primary)
                             .clickable { navigator.navigate(ProfileUserScreenDestination) }
                     ) {
                         AsyncImage(
