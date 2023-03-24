@@ -20,8 +20,10 @@ import com.jefisu.manualplus.core.util.retryUploadFile
 import com.jefisu.manualplus.destinations.AuthScreenDestination
 import com.jefisu.manualplus.destinations.DirectionDestination
 import com.jefisu.manualplus.destinations.HomeScreenDestination
+import com.jefisu.manualplus.destinations.ProfileUserScreenDestination
 import com.jefisu.manualplus.features_manual.presentation.SharedViewModel
 import com.jefisu.manualplus.features_manual.presentation.home.HomeScreen
+import com.jefisu.manualplus.features_manual.presentation.profile_user.ProfileUserScreen
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.manualcomposablecalls.composable
 import com.ramcosta.composedestinations.navigation.dependency
@@ -69,6 +71,12 @@ class MainActivity : ComponentActivity() {
                                     navigator = destinationsNavigator,
                                     loadUserData = sharedViewModel::getUser,
                                     onDataLoaded = { isLoading = false }
+                                )
+                            }
+                            composable(ProfileUserScreenDestination) {
+                                ProfileUserScreen(
+                                    navController = navController,
+                                    sharedState = state
                                 )
                             }
                         }

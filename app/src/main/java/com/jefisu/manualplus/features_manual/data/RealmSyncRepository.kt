@@ -109,4 +109,22 @@ class RealmSyncRepository(
     override suspend fun addFileToUpload(file: FileToUploadEntity) {
         fileToUploadDao.insertFileToUpload(file)
     }
+
+    override suspend fun updateAvatarUser(remotePath: String): SimpleResource {
+        return try {
+            realm.write {
+                val documentUser = query<UserDto>("_id == $0", BsonObjectId(user.id))
+                    .first()
+                    .find()
+                    ?: return@write Resource.Error<Unit>(UiText.DynamicString("User not found"))
+
+                documentUser.apply {
+                    avatar = remotePath
+                }
+                Resource.Success(Unit)
+            }
+        } catch (e: Exception) {
+            Resource.Error(UiText.unknownError())
+        }
+    }
 }

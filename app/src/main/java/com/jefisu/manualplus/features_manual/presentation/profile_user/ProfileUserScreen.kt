@@ -24,13 +24,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.jefisu.manualplus.R
+import com.jefisu.manualplus.core.presentation.components.AvatarImage
 import com.jefisu.manualplus.core.presentation.components.CustomTextField
-import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.destinations.AuthScreenDestination
+import com.jefisu.manualplus.destinations.AvatarsUserScreenDestination
 import com.jefisu.manualplus.features_manual.presentation.SharedState
 import com.jefisu.manualplus.features_manual.presentation.profile_user.components.BottomContentPattern
 import com.jefisu.manualplus.features_manual.presentation.profile_user.components.GalleryUploader
@@ -121,6 +120,7 @@ fun ProfileUserScreen(
                                 }
                             )
                         }
+
                         SettingsUser.ContactUs -> {
                             BottomContentPattern(
                                 title = state.settings.value,
@@ -180,6 +180,7 @@ fun ProfileUserScreen(
                                 }
                             )
                         }
+
                         SettingsUser.Logout -> {
                             Column(
                                 modifier = Modifier
@@ -252,35 +253,15 @@ fun ProfileUserScreen(
                             .padding(start = 24.dp)
                             .fillMaxWidth()
                     ) {
-                        Box {
-                            Box(
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(CircleShape)
-                                    .background(light_Primary)
-                            ) {
-                                AsyncImage(
-                                    model = ImageRequest.Builder(context)
-                                        .data(sharedState.avatarUri)
-                                        .crossfade(true)
-                                        .build(),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .offset(y = 11.dp)
-                                )
+                        AvatarImage(
+                            image = sharedState.avatarUri,
+                            iconAction = R.drawable.ic_edit,
+                            size = 100.dp,
+                            offsetY = 11.dp,
+                            onClick = {
+                                navController.navigate(AvatarsUserScreenDestination)
                             }
-                            Icon(
-                                painter = painterResource(R.drawable.ic_edit),
-                                contentDescription = null,
-                                tint = MaterialTheme.colors.background,
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .align(Alignment.BottomEnd)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colors.onBackground)
-                            )
-                        }
+                        )
                         Spacer(modifier = Modifier.width(24.dp))
                         Column(
                             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)

@@ -5,11 +5,32 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Text
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +50,7 @@ import androidx.constraintlayout.compose.MotionScene
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.jefisu.manualplus.R
+import com.jefisu.manualplus.core.presentation.components.BottomSheet
 import com.jefisu.manualplus.core.presentation.components.CustomButton
 import com.jefisu.manualplus.core.presentation.components.CustomTextField
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
@@ -37,7 +59,6 @@ import com.jefisu.manualplus.features_auth.presentation.components.GoogleButton
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.navigate
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMotionApi::class, ExperimentalMaterialApi::class)
 @RootNavGraph(start = true)
@@ -86,34 +107,10 @@ fun AuthScreen(
         }
     }
 
-    ModalBottomSheetLayout(
+    BottomSheet(
+        error = error?.asString().orEmpty(),
         sheetState = sheetState,
-        sheetElevation = 0.dp,
-        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        scrimColor = Color.Black.copy(0.5f),
-        sheetContent = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 100.dp)
-                    .padding(MaterialTheme.spacing.medium)
-            ) {
-                Text(
-                    text = error?.asString().orEmpty(),
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.onBackground
-                )
-                Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
-                CustomButton(
-                    text = "OK",
-                    buttonShape = RoundedCornerShape(8.dp),
-                    onClick = {
-                        viewModel.errorDisplayed()
-                        scope.launch { sheetState.hide() }
-                    }
-                )
-            }
-        }
+        onOkClick = viewModel::errorDisplayed
     ) {
         MotionLayout(
             motionScene = MotionScene(content = motionScene),

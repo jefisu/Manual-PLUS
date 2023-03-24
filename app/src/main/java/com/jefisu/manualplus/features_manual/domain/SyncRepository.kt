@@ -11,4 +11,5 @@ interface SyncRepository {
     suspend fun updateUserInfo(name: String): SimpleResource
     suspend fun addSupportRequest(supportRequest: SupportRequest): SimpleResource
     suspend fun addFileToUpload(file: FileToUploadEntity)
+    suspend fun updateAvatarUser(remotePath: String): SimpleResource
 }
