@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -166,7 +167,7 @@ fun DetailScreen(
             modifier = Modifier.layoutId("description")
         ) {
             Text(
-                text = "Description".uppercase(),
+                text = stringResource(R.string.description).uppercase(),
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onBackground,
                 fontWeight = FontWeight.Bold
@@ -185,7 +186,7 @@ fun DetailScreen(
             modifier = Modifier.layoutId("stepByStep")
         ) {
             Text(
-                text = "Step by Step".uppercase(),
+                text = stringResource(R.string.step_by_step).uppercase(),
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onBackground,
                 fontWeight = FontWeight.Bold
@@ -219,7 +220,7 @@ fun DetailScreen(
                 .background(MaterialTheme.colors.background)
         ) {
             Text(
-                text = "See more",
+                text = stringResource(R.string.see_more),
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onBackground,
                 fontWeight = FontWeight.Bold,
@@ -254,7 +255,7 @@ fun DetailScreen(
                     .height(34.dp)
             ) {
                 Text(
-                    text = "See less",
+                    text = stringResource(R.string.see_less),
                     style = MaterialTheme.typography.body2,
                     fontWeight = FontWeight.Bold,
                 )

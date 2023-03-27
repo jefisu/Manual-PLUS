@@ -28,7 +28,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,6 +39,7 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -75,7 +75,6 @@ fun AuthScreen(
     val isLoadingGoogle by viewModel.isLoadingGoogle.collectAsState()
 
     val focusManager = LocalFocusManager.current
-    val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     var animateToEnd by rememberSaveable { mutableStateOf(false) }
@@ -131,7 +130,7 @@ fun AuthScreen(
                 modifier = Modifier.layoutId("containerSignUp"),
                 content = {
                     Text(
-                        text = "Sign Up",
+                        text = stringResource(R.string.sign_up),
                         style = MaterialTheme.typography.h6,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colors.background
@@ -140,7 +139,7 @@ fun AuthScreen(
                     CustomTextField(
                         text = signUpState.email,
                         onTextChange = { viewModel.enteredEmail(it, isSigning = true) },
-                        placeholderText = "jeferson.c@example.com",
+                        placeholderText = "john.doe@example.com",
                         nameTextField = "Email",
                         iconView = R.drawable.ic_email,
                         isPrimaryColorBackground = true,
@@ -152,8 +151,8 @@ fun AuthScreen(
                     CustomTextField(
                         text = signUpState.password,
                         onTextChange = { viewModel.enteredPassword(it, isSigning = true) },
-                        placeholderText = "Digit your password",
-                        nameTextField = "Password",
+                        placeholderText = stringResource(R.string.digit_your_password),
+                        nameTextField = stringResource(R.string.password),
                         iconView = R.drawable.ic_lock,
                         isPrimaryColorBackground = true,
                         isPassword = true,
@@ -165,8 +164,8 @@ fun AuthScreen(
                     CustomTextField(
                         text = signUpState.repeatPassword,
                         onTextChange = viewModel::enteredName,
-                        placeholderText = "Repeat your password",
-                        nameTextField = "Repeat password",
+                        placeholderText = stringResource(R.string.repeat_your_password),
+                        nameTextField = stringResource(R.string.repeat_password),
                         iconView = R.drawable.ic_lock,
                         isPrimaryColorBackground = true,
                         isPassword = true,
@@ -176,9 +175,10 @@ fun AuthScreen(
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     CustomButton(
-                        text = "Create Account",
+                        text = stringResource(R.string.create_account),
                         backgroundIsPrimary = true,
-                        onClick = viewModel::signUp
+                        onClick = viewModel::signUp,
+                        isLoading = isLoading
                     )
                 }
             )
@@ -189,7 +189,7 @@ fun AuthScreen(
                 modifier = Modifier.layoutId("containerLogin"),
                 content = {
                     Text(
-                        text = "Log In",
+                        text = stringResource(R.string.log_in),
                         style = MaterialTheme.typography.h6,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colors.onBackground
@@ -209,23 +209,23 @@ fun AuthScreen(
                         CustomTextField(
                             text = loginState.password,
                             onTextChange = { viewModel.enteredPassword(it, isSigning = false) },
-                            nameTextField = "Password",
+                            nameTextField = stringResource(R.string.password),
                             isPassword = true,
-                            placeholderText = "Digit your password",
+                            placeholderText = stringResource(R.string.digit_your_password),
                             iconView = R.drawable.ic_lock,
                             imeAction = ImeAction.Done,
                             keyboardAction = focusManager::clearFocus
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "Forgot Password?",
+                            text = stringResource(R.string.forgot_password),
                             fontSize = 12.sp,
                             color = MaterialTheme.colors.onBackground,
                             modifier = Modifier.align(Alignment.End)
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         CustomButton(
-                            text = "Log In",
+                            text = stringResource(R.string.log_in),
                             isLoading = isLoading,
                             onClick = viewModel::login
                         )
@@ -242,7 +242,7 @@ fun AuthScreen(
                                     .background(MaterialTheme.colors.onBackground)
                             )
                             Text(
-                                text = "or",
+                                text = stringResource(R.string.or),
                                 style = MaterialTheme.typography.body1,
                                 color = MaterialTheme.colors.onBackground,
                             )

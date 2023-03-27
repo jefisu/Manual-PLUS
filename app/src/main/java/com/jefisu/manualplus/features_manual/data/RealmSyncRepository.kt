@@ -1,5 +1,6 @@
 package com.jefisu.manualplus.features_manual.data
 
+import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.data.FileToUploadDao
 import com.jefisu.manualplus.core.data.entity.FileToUploadEntity
 import com.jefisu.manualplus.core.util.Resource
@@ -79,7 +80,7 @@ class RealmSyncRepository(
                 val documentUser = query<UserDto>("_id == $0", BsonObjectId(user.id))
                     .first()
                     .find()
-                    ?: return@write Resource.Error<Unit>(UiText.DynamicString("User not found"))
+                    ?: return@write Resource.Error<Unit>(UiText.StringResource(R.string.user_not_found))
 
                 documentUser.apply {
                     this.name = name
@@ -87,7 +88,9 @@ class RealmSyncRepository(
                 Resource.Success(Unit)
             }
         } catch (e: Exception) {
-            Resource.Error(UiText.unknownError())
+            Resource.Error(
+                UiText.StringResource(R.string.an_error_occurred_while_updating_user_information)
+            )
         }
     }
 
@@ -102,7 +105,9 @@ class RealmSyncRepository(
             }
             Resource.Success(Unit)
         } catch (e: Exception) {
-            Resource.Error(UiText.unknownError())
+            Resource.Error(
+                UiText.StringResource(R.string.an_error_occurred_while_submitting_the_support_request)
+            )
         }
     }
 
@@ -116,7 +121,7 @@ class RealmSyncRepository(
                 val documentUser = query<UserDto>("_id == $0", BsonObjectId(user.id))
                     .first()
                     .find()
-                    ?: return@write Resource.Error<Unit>(UiText.DynamicString("User not found"))
+                    ?: return@write Resource.Error<Unit>(UiText.StringResource(R.string.user_not_found))
 
                 documentUser.apply {
                     avatar = remotePath
@@ -124,7 +129,9 @@ class RealmSyncRepository(
                 Resource.Success(Unit)
             }
         } catch (e: Exception) {
-            Resource.Error(UiText.unknownError())
+            Resource.Error(
+                UiText.StringResource(R.string.an_error_occurred_while_updating_the_avatar)
+            )
         }
     }
 }

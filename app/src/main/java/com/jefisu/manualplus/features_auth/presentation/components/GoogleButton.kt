@@ -2,6 +2,7 @@ package com.jefisu.manualplus.features_auth.presentation.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import com.jefisu.manualplus.BuildConfig
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.CustomButton
@@ -32,7 +33,7 @@ fun GoogleButton(
     )
 
     CustomButton(
-        text = "Sign In with Google",
+        text = stringResource(R.string.sign_in_with_google),
         icon = R.drawable.google_logo,
         isLoading = isLoading,
         modifier = modifier,

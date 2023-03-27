@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.AvatarImage
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.destinations.DetailScreenDestination
@@ -86,13 +88,13 @@ fun HomeScreen(
                             withStyle(
                                 style = SpanStyle(fontWeight = FontWeight.Bold)
                             ) {
-                                append("Hi, ")
+                                append(stringResource(R.string.hi, " "))
                             }
                             append(
                                 when (LocalTime.now().hour) {
-                                    in 6..11 -> "good morning"
-                                    in 12..17 -> "good afternoon"
-                                    else -> "good evening"
+                                    in 6..11 -> stringResource(R.string.good_morning)
+                                    in 12..17 -> stringResource(R.string.good_afternoon)
+                                    else -> stringResource(R.string.good_evening)
                                 } + "!"
                             )
                         },

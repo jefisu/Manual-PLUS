@@ -22,10 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.jefisu.manualplus.R
 import me.rerere.zoomableimage.ZoomableImage
 
 @Composable
@@ -60,7 +62,7 @@ fun GalleryUploader(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close Icon"
                         )
-                        Text(text = "Close")
+                        Text(text = stringResource(R.string.close))
                     }
                     Button(onClick = {
                         onSelectImages(
@@ -72,7 +74,7 @@ fun GalleryUploader(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete Icon"
                         )
-                        Text(text = "Delete")
+                        Text(text = stringResource(R.string.delete))
                     }
                 }
             }

@@ -95,7 +95,7 @@ fun ProfileUserScreen(
                     when (state.settings) {
                         SettingsUser.EditProfile -> {
                             BottomContentPattern(
-                                title = state.settings.value,
+                                title = stringResource(id = state.settings.res),
                                 scope = scope,
                                 sheetState = sheetState,
                                 height = 219.dp,
@@ -111,7 +111,7 @@ fun ProfileUserScreen(
                                             text = state.name,
                                             onTextChange = viewModel::enteredName,
                                             placeholderText = "John Doe",
-                                            nameTextField = "Name",
+                                            nameTextField = stringResource(R.string.name),
                                             iconView = R.drawable.ic_user,
                                             imeAction = ImeAction.Done,
                                             keyboardAction = focusManager::clearFocus
@@ -123,19 +123,19 @@ fun ProfileUserScreen(
 
                         SettingsUser.ContactUs -> {
                             BottomContentPattern(
-                                title = state.settings.value,
+                                title = stringResource(id = state.settings.res),
                                 scope = scope,
                                 sheetState = sheetState,
                                 height = 521.dp,
-                                textButton = "Send",
+                                textButton = stringResource(R.string.send),
                                 onSaveClick = viewModel::sendSupportRequest,
                                 content = {
                                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                                     CustomTextField(
                                         text = state.hospitalName,
                                         onTextChange = viewModel::enteredHospitalName,
-                                        placeholderText = "Enter the name of your hospital",
-                                        nameTextField = "Hospital",
+                                        placeholderText = stringResource(R.string.enter_the_name_hospital),
+                                        nameTextField = stringResource(R.string.hospital),
                                         iconView = R.drawable.ic_hospital,
                                         imeAction = ImeAction.Next,
                                         keyboardAction = { focusManager.moveFocus(FocusDirection.Down) },
@@ -145,8 +145,8 @@ fun ProfileUserScreen(
                                     CustomTextField(
                                         text = state.hospitalAddress,
                                         onTextChange = viewModel::enteredHospitalAddress,
-                                        placeholderText = "233 Paulista Avenue, São Paulo, SP 01310-100",
-                                        nameTextField = "Address",
+                                        placeholderText = stringResource(R.string.placeholder_address),
+                                        nameTextField = stringResource(R.string.address),
                                         iconView = R.drawable.ic_location,
                                         imeAction = ImeAction.Next,
                                         keyboardAction = { focusManager.moveFocus(FocusDirection.Down) },
@@ -163,7 +163,7 @@ fun ProfileUserScreen(
                                             focusedBorderColor = MaterialTheme.colors.onBackground,
                                             unfocusedBorderColor = MaterialTheme.colors.onBackground,
                                         ),
-                                        placeholder = { Text(text = "Write your problem here...") },
+                                        placeholder = { Text(text = stringResource(R.string.write_your_problem_here)) },
                                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                                         keyboardActions = KeyboardActions { focusManager.clearFocus() },
                                         modifier = Modifier
@@ -200,7 +200,7 @@ fun ProfileUserScreen(
                                 )
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                                 Text(
-                                    text = "Yes",
+                                    text = stringResource(R.string.yes),
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.h6,
                                     modifier = Modifier
@@ -219,7 +219,7 @@ fun ProfileUserScreen(
                                         .background(MaterialTheme.colors.onBackground)
                                 )
                                 Text(
-                                    text = "No",
+                                    text = stringResource(R.string.no),
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.h6,
                                     modifier = Modifier
@@ -320,7 +320,7 @@ fun ProfileUserScreen(
                         )
                         Spacer(modifier = Modifier.width(24.dp))
                         Text(
-                            text = setting.value,
+                            text = stringResource(id = setting.res),
                             style = MaterialTheme.typography.h5,
                             color = MaterialTheme.colors.onBackground
                         )

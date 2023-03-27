@@ -7,7 +7,6 @@ import com.jefisu.manualplus.core.util.UiText
 import com.jefisu.manualplus.features_auth.domain.AuthRepository
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.Credentials
-import io.realm.kotlin.mongodb.exceptions.InvalidCredentialsException
 import io.realm.kotlin.mongodb.exceptions.UserAlreadyExistsException
 
 class AuthRepositoryImpl(
@@ -20,10 +19,8 @@ class AuthRepositoryImpl(
                 .login(Credentials.emailPassword(email, password))
                 .loggedIn
             if (isLogged) Resource.Success(Unit) else Resource.Error(UiText.unknownError())
-        } catch (e: InvalidCredentialsException) {
-            Resource.Error(UiText.StringResource(R.string.invalid_e_mail_or_password))
         } catch (_: Exception) {
-            Resource.Error(UiText.unknownError())
+            Resource.Error(UiText.StringResource(R.string.invalid_e_mail_or_password))
         }
     }
 

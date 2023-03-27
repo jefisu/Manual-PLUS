@@ -80,15 +80,6 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _error.update { null }
 
-            val emailResult = ValidateData.validateEmail(_loginState.value.email)
-            val passwordResult = ValidateData.validatePassword(_loginState.value.password)
-            val validationsResult = listOf(emailResult, passwordResult)
-            if (validationsResult.any { it.error != null }) {
-                _error.update { validationsResult.firstNotNullOf { it.error } }
-                _isLoading.update { false }
-                return@launch
-            }
-
             _isLoading.update { true }
             val result = repository.login(_loginState.value.email, _loginState.value.password)
             if (result is Resource.Error) {

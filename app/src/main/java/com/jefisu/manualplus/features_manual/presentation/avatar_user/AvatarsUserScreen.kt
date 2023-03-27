@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -101,7 +102,7 @@ fun AvatarsUserScreen(
                     )
                 }
                 Text(
-                    text = sharedState.user?.name ?: "User",
+                    text = sharedState.user?.name ?: stringResource(R.string.user),
                     style = MaterialTheme.typography.body2,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colors.onBackground,
@@ -109,7 +110,7 @@ fun AvatarsUserScreen(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = "SAVE",
+                    text = stringResource(R.string.save).uppercase(),
                     style = MaterialTheme.typography.body2,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colors.primary,
