@@ -1,13 +1,7 @@
 package com.jefisu.manualplus.features_manual.presentation.avatar_user
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -123,7 +117,10 @@ fun AvatarsUserScreen(
                 )
             }
             Divider()
-            ShimmerEffectList(isLoading = state.isLoading) {
+            ShimmerEffectList(
+                isLoading = state.isLoading,
+                modifier = Modifier.fillMaxSize()
+            ) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),

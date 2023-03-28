@@ -4,15 +4,14 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,10 +21,20 @@ import com.jefisu.manualplus.core.util.shimmerEffect
 
 @Composable
 fun ShimmerEffectList(
+    modifier: Modifier = Modifier,
     isLoading: Boolean = false,
-    contentAfterLoading: @Composable () -> Unit,
+    contentAfterLoading: @Composable () -> Unit
 ) {
-    Box {
+    BoxWithConstraints(modifier = modifier) {
+        val size = 100.dp
+        val numberVisibleItems = remember {
+            derivedStateOf {
+                val itemsPerRow = (maxWidth / size).toInt()
+                val itemsPerColumn = (maxHeight / size).toInt() - 1
+                itemsPerColumn * itemsPerRow
+            }
+        }
+
         AnimatedVisibility(
             visible = isLoading,
             exit = fadeOut(animationSpec = tween(700))
@@ -36,7 +45,7 @@ fun ShimmerEffectList(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 userScrollEnabled = false
             ) {
-                items(15) {
+                items(numberVisibleItems.value) {
                     Box(
                         modifier = Modifier
                             .padding(
@@ -46,7 +55,7 @@ fun ShimmerEffectList(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(100.dp)
+                                .size(size)
                                 .clip(CircleShape)
                                 .align(Alignment.Center)
                                 .shimmerEffect()
