@@ -4,7 +4,6 @@
     <string name="invalid_e_mail_or_password">E-mail ou senha inválidos</string>
     <string name="email_already_used_by_another_user">E-mail já utilizado por outro usuário.</string>
     <string name="you_re_offline_check_your_internet_connection">Você está offline. Verifique sua conexão com a internet.</string>
-    <string name="title_activity_auth">Atividade de Autenticação</string>
     <string name="fields_can_t_be_blank">Os campos não podem estar em branco.</string>
     <string name="the_data_has_been_updated_successfully">Os dados foram atualizados com sucesso.</string>
     <string name="failed_try_send_support_request">Houve um problema ao tentar enviar sua solicitação. Tente novamente mais tarde.</string>
