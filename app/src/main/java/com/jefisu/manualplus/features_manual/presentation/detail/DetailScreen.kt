@@ -86,7 +86,7 @@ fun DetailScreen(
         EquipmentInfo(equipment.category, R.drawable.ic_category)
     )
     val bottomInfo =
-        listOf("Read 10 min", "Text", "Text")
+        listOf(stringResource(R.string.time_read, 10), equipment.createdAt)
 
     MotionLayout(
         motionScene = MotionScene(content = motionScene),
