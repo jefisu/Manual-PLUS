@@ -6,12 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.storage.FirebaseStorage
 import com.jefisu.manualplus.core.data.FileToUploadDao
@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
         cleanupCheck()
         setContent {
             val sharedViewModel = hiltViewModel<SharedViewModel>()
-            val state by sharedViewModel.state.collectAsState()
+            val state by sharedViewModel.state.collectAsStateWithLifecycle()
 
             ManualPLUSTheme {
                 Surface(
