@@ -135,7 +135,7 @@
         start: ['parent', 'start', 16],
         end: ['parent', 'end', 16],
         top: ['navigationIcon', 'bottom', 12],
-        bottom: ['parent', 'bottom'],
+        bottom: ['seeMore', 'top', 8],
         translationZ: 0.1
       },
       seeMore: {
