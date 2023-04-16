@@ -12,6 +12,5 @@ data class Equipment(
     val serialNumber: Int,
     val releaseYear: Int,
     val category: String,
-    val stepByStep: List<String>,
     val createdAt: String
 ) : Parcelable

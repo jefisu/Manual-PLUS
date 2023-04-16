@@ -48,7 +48,7 @@
       description: {
         width: 'spread',
         start: ['parent', 'start', 16],
-        end: ['parent', 'end', 12],
+        end: ['parent', 'end', 16],
         top: ['image', 'bottom', 24],
         translationZ: 0.1,
       },
@@ -56,7 +56,7 @@
         width: 'spread',
         height: 'spread',
         start: ['parent', 'start', 16],
-        end: ['parent', 'end', 12],
+        end: ['parent', 'end', 16],
         top: ['description', 'bottom', 24],
         bottom: ['parent', 'bottom'],
         translationZ: 0.1,
@@ -104,10 +104,11 @@
         translationZ: 0
       },
       name: {
-        width: 100,
-        start: ['parent', 'start'],
+        width: 'spread',
+        start: ['navigationIcon', 'end', 16],
         end: ['parent', 'end'],
-        top: ['parent', 'top', 17],
+        top: ['navigationIcon', 'top'],
+        bottom: ['navigationIcon', 'bottom'],
         translationZ: 0.1,
         custom: {
           lightTextColor: '#252033',
@@ -124,7 +125,7 @@
       description: {
         width: 'spread',
         start: ['parent', 'start', 16],
-        end: ['parent', 'end', 12],
+        end: ['parent', 'end', 16],
         top: ['image', 'bottom', 24],
         translationZ: 0,
       },
@@ -132,7 +133,7 @@
         width: 'spread',
         height: 'spread',
         start: ['parent', 'start', 16],
-        end: ['parent', 'end', 12],
+        end: ['parent', 'end', 16],
         top: ['navigationIcon', 'bottom', 12],
         bottom: ['parent', 'bottom'],
         translationZ: 0.1

@@ -6,7 +6,7 @@ import com.google.firebase.storage.ktx.storageMetadata
 import timber.log.Timber
 
 fun fetchImageFromFirebase(remotePath: String?, response: (Uri) -> Unit) {
-    if (remotePath == null) {
+    if (remotePath.isNullOrBlank()) {
         Timber.d("Invalid remote path")
         return
     }

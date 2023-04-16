@@ -1,5 +1,6 @@
 package com.jefisu.manualplus.features_manual.presentation.home
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,38 +24,33 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.AvatarImage
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
-import com.jefisu.manualplus.destinations.DetailScreenDestination
-import com.jefisu.manualplus.destinations.ProfileUserScreenDestination
+import com.jefisu.manualplus.features_manual.domain.Equipment
 import com.jefisu.manualplus.features_manual.presentation.SharedState
 import com.jefisu.manualplus.features_manual.presentation.home.components.ListItem
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import java.time.LocalTime
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
+import java.time.LocalTime
 
 @OptIn(ExperimentalPagerApi::class)
 @Destination
 @Composable
 fun HomeScreen(
+    state: HomeState,
+    sharedState: SharedState,
     loadUserData: () -> Unit,
     onDataLoaded: () -> Unit,
-    sharedState: SharedState,
-    navigator: DestinationsNavigator,
-    viewModel: HomeViewModel = hiltViewModel()
+    navigateToDetail: (Pair<Equipment, Uri>) -> Unit,
+    navigateToProfile: () -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
@@ -105,9 +101,7 @@ fun HomeScreen(
                     AvatarImage(
                         image = sharedState.avatarUri,
                         isMirrored = true,
-                        onClick = {
-                            navigator.navigate(ProfileUserScreenDestination)
-                        }
+                        onClick = navigateToProfile
                     )
                 }
 
@@ -180,12 +174,7 @@ fun HomeScreen(
                             equipment = pairEquipment.first,
                             imageUri = pairEquipment.second,
                             onClickNavigate = {
-                                navigator.navigate(
-                                    DetailScreenDestination(
-                                        pairEquipment.first,
-                                        pairEquipment.second.toString()
-                                    )
-                                )
+                                navigateToDetail(pairEquipment)
                             },
                             modifier = Modifier.padding(
                                 start = 12.dp,

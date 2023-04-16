@@ -6,11 +6,14 @@ import com.jefisu.manualplus.core.data.entity.FileToUploadEntity
 import com.jefisu.manualplus.core.util.Resource
 import com.jefisu.manualplus.core.util.SimpleResource
 import com.jefisu.manualplus.core.util.UiText
+import com.jefisu.manualplus.features_manual.data.dto.ConfigurationDto
 import com.jefisu.manualplus.features_manual.data.dto.EquipmentDto
 import com.jefisu.manualplus.features_manual.data.dto.SupportRequestDto
 import com.jefisu.manualplus.features_manual.data.dto.UserDto
+import com.jefisu.manualplus.features_manual.data.mapper.toConfiguration
 import com.jefisu.manualplus.features_manual.data.mapper.toEquipment
 import com.jefisu.manualplus.features_manual.data.mapper.toSupportRequestDto
+import com.jefisu.manualplus.features_manual.domain.Configuration
 import com.jefisu.manualplus.features_manual.domain.Equipment
 import com.jefisu.manualplus.features_manual.domain.SupportRequest
 import com.jefisu.manualplus.features_manual.domain.SyncRepository
@@ -37,11 +40,12 @@ class RealmSyncRepository(
     private val realm by lazy {
         val config = SyncConfiguration.Builder(
             user,
-            setOf(UserDto::class, EquipmentDto::class, SupportRequestDto::class)
+            setOf(UserDto::class, EquipmentDto::class, SupportRequestDto::class, ConfigurationDto::class)
         ).initialSubscriptions { sub ->
             add(query = sub.query<UserDto>("_id == $0", ObjectId(user.id)))
             add(query = sub.query<EquipmentDto>())
             add(query = sub.query<SupportRequestDto>())
+            add(query = sub.query<ConfigurationDto>())
         }
             .log(LogLevel.ALL)
             .build()
@@ -71,6 +75,20 @@ class RealmSyncRepository(
                 .flowOn(Dispatchers.IO)
         } catch (e: Exception) {
             flowOf(Resource.Error(UiText.unknownError()))
+        }
+    }
+
+    override suspend fun getConfigurationEquipment(id: String): Resource<List<Configuration>> {
+        return try {
+            realm
+                .query<ConfigurationDto>("equipmentId == $0", id)
+                .find()
+                .toList()
+                .run {
+                    Resource.Success(this.map { it.toConfiguration() })
+                }
+        } catch (e: Exception) {
+            Resource.Error(UiText.unknownError())
         }
     }
 

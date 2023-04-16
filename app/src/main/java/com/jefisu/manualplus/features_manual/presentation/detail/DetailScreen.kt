@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -49,11 +48,14 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ExperimentalMotionApi
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.features_manual.domain.Equipment
+import com.jefisu.manualplus.features_manual.presentation.detail.components.ConfigurationItem
 import com.jefisu.manualplus.features_manual.presentation.home.components.EquipmentInfo
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -62,10 +64,14 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Destination
 @Composable
 fun DetailScreen(
-    equipment: Equipment,
+    id: String,
     imageURL: String,
-    navigator: DestinationsNavigator
+    equipment: Equipment,
+    navigator: DestinationsNavigator,
+    viewModel: DetailViewModel = hiltViewModel()
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     var animateToEnd by rememberSaveable { mutableStateOf(false) }
     val progress by animateFloatAsState(
         targetValue = if (animateToEnd) 1f else 0f,
@@ -136,7 +142,9 @@ fun DetailScreen(
         Text(
             text = equipment.name.uppercase(),
             style = MaterialTheme.typography.h5,
-            color = if (isSystemInDarkTheme()) nameProp.color("darkTextColor") else nameProp.color("lightTextColor"),
+            color = if (isSystemInDarkTheme()) nameProp.color("darkTextColor") else nameProp.color(
+                "lightTextColor"
+            ),
             modifier = Modifier.layoutId(nameProp.id())
         )
         Column(
@@ -182,7 +190,6 @@ fun DetailScreen(
             )
         }
         Column(
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
             modifier = Modifier.layoutId("stepByStep")
         ) {
             Text(
@@ -191,26 +198,15 @@ fun DetailScreen(
                 color = MaterialTheme.colors.onBackground,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.extraSmall))
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
                 userScrollEnabled = progress == 1f
             ) {
-                itemsIndexed(equipment.stepByStep) { i, step ->
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "${i + 1}.",
-                            style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onBackground,
-                        )
-                        Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
-                        Text(
-                            text = step,
-                            style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onBackground.copy(0.7f),
-                            textAlign = TextAlign.Justify
-                        )
-                    }
+                itemsIndexed(state.configurations) { i, config ->
+                    ConfigurationItem(
+                        index = i + 1,
+                        configurationStep = config,
+                        enabledClick = animateToEnd
+                    )
                 }
             }
         }
