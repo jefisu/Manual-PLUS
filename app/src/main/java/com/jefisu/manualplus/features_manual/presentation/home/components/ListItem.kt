@@ -1,27 +1,43 @@
 package com.jefisu.manualplus.features_manual.presentation.home.components
 
-import android.net.Uri
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
+import com.jefisu.manualplus.core.util.fetchImageFromFirebase
 import com.jefisu.manualplus.features_manual.domain.Equipment
 
 data class EquipmentInfo(
@@ -32,8 +48,7 @@ data class EquipmentInfo(
 @Composable
 fun ListItem(
     equipment: Equipment,
-    imageUri: Uri,
-    onClickNavigate: () -> Unit,
+    onClickNavigate: (Equipment, String) -> Unit,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.onBackground
 ) {
@@ -42,13 +57,22 @@ fun ListItem(
         EquipmentInfo(equipment.releaseYear.toString(), R.drawable.ic_calendar),
         EquipmentInfo(equipment.category, R.drawable.ic_category)
     )
-    val context = LocalContext.current
+    var imageUrl by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(key1 = Unit) {
+        if (imageUrl.isBlank()) {
+            fetchImageFromFirebase(
+                remotePath = equipment.image,
+                response = { imageUrl = it.toString() }
+            )
+        }
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .then(modifier)
-            .clickable { onClickNavigate() }
+            .clickable { onClickNavigate(equipment, imageUrl) }
     ) {
         Box(
             modifier = Modifier
@@ -58,11 +82,17 @@ fun ListItem(
                 .background(light_Primary)
                 .padding(12.dp)
         ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(imageUri)
-                    .crossfade(true)
-                    .build(),
+            val painter = rememberAsyncImagePainter(model = imageUrl)
+
+            if (painter.state is AsyncImagePainter.State.Loading) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colors.background,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            Image(
+                painter = painter,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize()
             )

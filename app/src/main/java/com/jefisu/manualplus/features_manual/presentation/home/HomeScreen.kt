@@ -1,6 +1,5 @@
 package com.jefisu.manualplus.features_manual.presentation.home
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -48,7 +47,7 @@ fun HomeScreen(
     sharedState: SharedState,
     loadUserData: () -> Unit,
     onDataLoaded: () -> Unit,
-    navigateToDetail: (Pair<Equipment, Uri>) -> Unit,
+    navigateToDetail: (Equipment, String) -> Unit,
     navigateToProfile: () -> Unit
 ) {
     val pagerState = rememberPagerState()
@@ -169,14 +168,11 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                     }
                     items(
-                        state.equipments.filter { it.first.category == categorySelected }
-                    ) { pairEquipment ->
+                        state.equipments.filter { it.category == categorySelected }
+                    ) { equipment ->
                         ListItem(
-                            equipment = pairEquipment.first,
-                            imageUri = pairEquipment.second,
-                            onClickNavigate = {
-                                navigateToDetail(pairEquipment)
-                            },
+                            equipment = equipment,
+                            onClickNavigate = navigateToDetail,
                             modifier = Modifier.padding(
                                 start = 12.dp,
                                 end = 12.dp,

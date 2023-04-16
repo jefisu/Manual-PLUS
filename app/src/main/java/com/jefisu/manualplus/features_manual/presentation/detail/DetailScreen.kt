@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -198,15 +199,30 @@ fun DetailScreen(
                 color = MaterialTheme.colors.onBackground,
                 fontWeight = FontWeight.Bold
             )
-            LazyColumn(
-                userScrollEnabled = progress == 1f
-            ) {
-                itemsIndexed(state.configurations) { i, config ->
-                    ConfigurationItem(
-                        index = i + 1,
-                        configurationStep = config,
-                        enabledClick = animateToEnd
+            if (state.configurations.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    Text(
+                        text = "Step by step not defined",
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.onBackground,
+                        modifier = Modifier.align(Alignment.Center)
                     )
+                }
+            } else {
+                LazyColumn(
+                    userScrollEnabled = progress == 1f
+                ) {
+                    itemsIndexed(state.configurations) { i, config ->
+                        ConfigurationItem(
+                            index = i + 1,
+                            configurationStep = config,
+                            enabledClick = animateToEnd
+                        )
+                    }
                 }
             }
         }
@@ -215,17 +231,19 @@ fun DetailScreen(
                 .layoutId("seeMore")
                 .background(MaterialTheme.colors.background)
         ) {
-            Text(
-                text = stringResource(R.string.see_more),
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onBackground,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(8.dp)
-                    .clickable { animateToEnd = true }
-                    .padding(4.dp)
-            )
+            if (state.configurations.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.see_more),
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(8.dp)
+                        .clickable { animateToEnd = true }
+                        .padding(4.dp)
+                )
+            }
         }
 
         Row(

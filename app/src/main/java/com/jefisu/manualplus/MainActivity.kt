@@ -76,14 +76,12 @@ class MainActivity : ComponentActivity() {
                                     state = state,
                                     loadUserData = sharedViewModel::getUser,
                                     onDataLoaded = { isLoading = false },
-                                    navigateToDetail = {
-                                        val equipment = it.first
-                                        val imageURL = it.second.toString()
+                                    navigateToDetail = { equipment, imageURL ->
                                         destinationsNavigator.navigate(
                                             DetailScreenDestination(
-                                                equipment.id,
-                                                imageURL,
-                                                equipment
+                                                id = equipment.id,
+                                                imageURL = imageURL,
+                                                equipment = equipment
                                             )
                                         )
                                     },
