@@ -67,95 +67,96 @@ fun HomeScreen(
         loadUserData()
     }
 
-    CollapsingToolbarScaffold(
-        modifier = Modifier.fillMaxSize(),
-        state = collapseToolbarState,
-        scrollStrategy = ScrollStrategy.EnterAlwaysCollapsed,
-        toolbar = {
-            Column {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 12.dp, end = 12.dp, top = MaterialTheme.spacing.medium)
-                ) {
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(fontWeight = FontWeight.Bold)
-                            ) {
-                                append(stringResource(R.string.hi, " "))
-                            }
-                            append(
-                                when (LocalTime.now().hour) {
-                                    in 6..11 -> stringResource(R.string.good_morning)
-                                    in 12..17 -> stringResource(R.string.good_afternoon)
-                                    else -> stringResource(R.string.good_evening)
-                                } + "!"
-                            )
-                        },
-                        style = MaterialTheme.typography.h4,
-                        color = MaterialTheme.colors.onBackground
-                    )
-                    AvatarImage(
-                        image = sharedState.avatarUri,
-                        isMirrored = true,
-                        onClick = navigateToProfile
-                    )
-                }
-
-                if (state.equipments.isNotEmpty()) {
-                    LazyRow {
-                        item {
-                            Spacer(modifier = Modifier.width(MaterialTheme.spacing.extraSmall))
-                        }
-                        itemsIndexed(state.categories) { index, category ->
-                            val selected = pagerState.currentPage == index
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = category,
-                                    style = MaterialTheme.typography.body1,
-                                    color = MaterialTheme.colors.onBackground,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                    modifier = Modifier
-                                        .onSizeChanged {
-                                            widthCategorySelected =
-                                                with(density) { it.width.toDp() }
-                                        }
-                                        .clickable {
-                                            scope.launch { pagerState.animateScrollToPage(index) }
-                                        }
-                                        .padding(MaterialTheme.spacing.small)
-                                )
-                                if (selected) {
-                                    Box(
-                                        modifier = Modifier
-                                            .width(widthCategorySelected - MaterialTheme.spacing.small)
-                                            .height(2.dp)
-                                            .padding(horizontal = MaterialTheme.spacing.extraSmall)
-                                            .clip(CircleShape)
-                                            .background(MaterialTheme.colors.onBackground)
-                                    )
+    if (state.equipments.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else {
+        CollapsingToolbarScaffold(
+            modifier = Modifier.fillMaxSize(),
+            state = collapseToolbarState,
+            scrollStrategy = ScrollStrategy.EnterAlwaysCollapsed,
+            toolbar = {
+                Column {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 12.dp, end = 12.dp, top = MaterialTheme.spacing.medium)
+                    ) {
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(fontWeight = FontWeight.Bold)
+                                ) {
+                                    append(stringResource(R.string.hi, " "))
                                 }
+                                append(
+                                    when (LocalTime.now().hour) {
+                                        in 6..11 -> stringResource(R.string.good_morning)
+                                        in 12..17 -> stringResource(R.string.good_afternoon)
+                                        else -> stringResource(R.string.good_evening)
+                                    } + "!"
+                                )
+                            },
+                            style = MaterialTheme.typography.h4,
+                            color = MaterialTheme.colors.onBackground
+                        )
+                        AvatarImage(
+                            image = sharedState.avatarUri,
+                            isMirrored = true,
+                            onClick = navigateToProfile
+                        )
+                    }
+
+                    if (state.equipments.isNotEmpty()) {
+                        LazyRow {
+                            item {
+                                Spacer(modifier = Modifier.width(MaterialTheme.spacing.extraSmall))
                             }
-                            Spacer(modifier = Modifier.width(MaterialTheme.spacing.extraSmall))
+                            itemsIndexed(state.categories) { index, category ->
+                                val selected = pagerState.currentPage == index
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = category,
+                                        style = MaterialTheme.typography.body1,
+                                        color = MaterialTheme.colors.onBackground,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                        modifier = Modifier
+                                            .onSizeChanged {
+                                                widthCategorySelected =
+                                                    with(density) { it.width.toDp() }
+                                            }
+                                            .clickable {
+                                                scope.launch { pagerState.animateScrollToPage(index) }
+                                            }
+                                            .padding(MaterialTheme.spacing.small)
+                                    )
+                                    if (selected) {
+                                        Box(
+                                            modifier = Modifier
+                                                .width(widthCategorySelected - MaterialTheme.spacing.small)
+                                                .height(2.dp)
+                                                .padding(horizontal = MaterialTheme.spacing.extraSmall)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colors.onBackground)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(MaterialTheme.spacing.extraSmall))
+                            }
                         }
                     }
                 }
             }
-        }
-    ) {
-        if (state.equipments.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
+        ) {
+
             HorizontalPager(
                 count = state.categories.size,
                 state = pagerState
@@ -187,4 +188,5 @@ fun HomeScreen(
             }
         }
     }
+
 }
