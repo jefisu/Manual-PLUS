@@ -1,6 +1,7 @@
 package com.jefisu.manualplus.features_manual.presentation.detail.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -64,6 +65,10 @@ fun ConfigurationItem(
         label = ""
     )
     var imageUrl by rememberSaveable { mutableStateOf("") }
+    val textColor by animateColorAsState(
+        targetValue = if (showDetail) MaterialTheme.colors.onBackground else MaterialTheme.colors.onBackground.copy(0.7f),
+        label = ""
+    )
 
     LaunchedEffect(key1 = Unit, enabledClick) {
         if (imageUrl.isEmpty()) {
@@ -92,13 +97,13 @@ fun ConfigurationItem(
             Text(
                 text = "$index.",
                 style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onBackground.copy(0.7f),
+                color = textColor
             )
             Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
             Text(
                 text = configurationStep.title,
                 style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onBackground.copy(0.7f),
+                color = textColor,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Justify,
                 maxLines = 2,
@@ -116,7 +121,7 @@ fun ConfigurationItem(
         }
         AnimatedVisibility(
             visible = showDetail,
-            modifier = Modifier.padding(start = MaterialTheme.spacing.medium)
+            modifier = Modifier.padding(start = MaterialTheme.spacing.large)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -127,7 +132,8 @@ fun ConfigurationItem(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
-                                .padding(start = 24.dp)
+                                .padding(start = 32.dp)
+                                .padding(vertical = MaterialTheme.spacing.small)
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(Color.LightGray)
                         ) {
