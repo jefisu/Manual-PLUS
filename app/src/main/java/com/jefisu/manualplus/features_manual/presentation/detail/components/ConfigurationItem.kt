@@ -37,8 +37,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
@@ -66,7 +70,9 @@ fun ConfigurationItem(
     )
     var imageUrl by rememberSaveable { mutableStateOf("") }
     val textColor by animateColorAsState(
-        targetValue = if (showDetail) MaterialTheme.colors.onBackground else MaterialTheme.colors.onBackground.copy(0.7f),
+        targetValue = if (showDetail) MaterialTheme.colors.onBackground else MaterialTheme.colors.onBackground.copy(
+            0.7f
+        ),
         label = ""
     )
 
@@ -168,7 +174,7 @@ fun ConfigurationItem(
                             color = MaterialTheme.colors.onBackground
                         )
                         Text(
-                            text = _step,
+                            text = formatTextWithAnnotations(_step),
                             style = MaterialTheme.typography.body2,
                             color = MaterialTheme.colors.onBackground,
                             textAlign = TextAlign.Justify
@@ -177,5 +183,41 @@ fun ConfigurationItem(
                 }
             }
         }
+    }
+}
+
+fun formatTextWithAnnotations(input: String) = buildAnnotatedString {
+    val boldPattern = ";([^;]+);".toRegex()
+    val italicPattern = "_([^_]+)_".toRegex()
+    var startIndex = 0
+    boldPattern
+        .findAll(input)
+        .forEach { matchResult ->
+            val matchValue = matchResult.value
+            val matchIndex = matchResult.range.first
+            if (matchIndex > startIndex) {
+                append(input.substring(startIndex, matchIndex))
+            }
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(matchValue.substring(1, matchValue.lastIndex))
+            }
+            startIndex = matchResult.range.last + 1
+        }
+    italicPattern
+        .findAll(input)
+        .forEach { matchResult ->
+            val matchIndex = matchResult.range.first
+            val matchValue = matchResult.value
+            if (matchIndex > startIndex) {
+                append(input.substring(startIndex, matchIndex))
+            }
+            startIndex = matchResult.range.last + 1
+            val matchValueWithoutDelimiter = matchValue.removeSurrounding("_")
+            withStyle(style = SpanStyle(fontStyle = FontStyle.Italic, color = Color.Blue)) {
+                append(matchValueWithoutDelimiter)
+            }
+        }
+    if (startIndex < input.length) {
+        append(input.substring(startIndex))
     }
 }
