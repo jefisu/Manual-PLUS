@@ -12,6 +12,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,7 +30,8 @@ import com.google.accompanist.pager.rememberPagerState
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.AvatarImage
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
-import com.jefisu.manualplus.features_manual.presentation.SharedState
+import com.jefisu.manualplus.core.util.fetchImageFromFirebase
+import com.jefisu.manualplus.features_manual.domain.User
 import com.jefisu.manualplus.features_manual.presentation.home.components.ListItem
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
@@ -43,17 +45,16 @@ import java.time.LocalTime
 @Composable
 fun HomeScreen(
     state: HomeState,
-    sharedState: SharedState,
-    loadUserData: () -> Unit,
     onDataLoaded: () -> Unit,
     navigateToDetail: (String, String) -> Unit,
-    navigateToProfile: () -> Unit
+    navigateToProfile: (User?, String) -> Unit
 ) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
     var widthCategorySelected by remember { mutableStateOf(0.dp) }
     val collapseToolbarState = rememberCollapsingToolbarScaffoldState()
+    var userProfile by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(key1 = state.equipments) {
         if (state.equipments.isNotEmpty()) {
@@ -61,8 +62,13 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(key1 = Unit) {
-        loadUserData()
+    LaunchedEffect(key1 = state.user) {
+        if (userProfile.isBlank() && state.user != null) {
+            fetchImageFromFirebase(
+                remotePath = state.user.avatarRemotePath,
+                response = { userProfile = it.toString() }
+            )
+        }
     }
 
     if (state.equipments.isEmpty()) {
@@ -105,9 +111,11 @@ fun HomeScreen(
                             color = MaterialTheme.colors.onBackground
                         )
                         AvatarImage(
-                            image = sharedState.avatarUri,
+                            image = userProfile,
                             isMirrored = true,
-                            onClick = navigateToProfile
+                            onClick = {
+                                navigateToProfile(state.user, userProfile)
+                            }
                         )
                     }
 

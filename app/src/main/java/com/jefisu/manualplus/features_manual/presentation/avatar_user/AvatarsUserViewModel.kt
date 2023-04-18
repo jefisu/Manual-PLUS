@@ -1,6 +1,7 @@
 package com.jefisu.manualplus.features_manual.presentation.avatar_user
 
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.ktx.Firebase
@@ -9,19 +10,20 @@ import com.jefisu.manualplus.core.util.Resource
 import com.jefisu.manualplus.core.util.UiText
 import com.jefisu.manualplus.features_manual.domain.SyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.net.URL
-import java.net.URLDecoder
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.net.URL
+import java.net.URLDecoder
+import javax.inject.Inject
 
 @HiltViewModel
 class AvatarsUserViewModel @Inject constructor(
-    private val repository: SyncRepository
+    private val repository: SyncRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AvatarsUserState())
@@ -31,10 +33,11 @@ class AvatarsUserViewModel @Inject constructor(
     val uiEvent = _uiEvent.receiveAsFlow()
 
     init {
+        savedStateHandle.get<String>("userProfile")?.let(::selectAvatar)
         loadAvailableAvatars()
     }
 
-    fun loadAvailableAvatars() {
+    private fun loadAvailableAvatars() {
         _state.update { it.copy(isLoading = true) }
         Firebase
             .storage
@@ -51,7 +54,9 @@ class AvatarsUserViewModel @Inject constructor(
                                 state.copy(
                                     isLoading = false,
                                     error = null,
-                                    availableAvatars = uris.sortedBy { it.extractNumberFromString() }
+                                    availableAvatars = uris
+                                        .map { it.toString() }
+                                        .sortedBy { it.extractNumberFromString() }
                                 )
                             }
                         }
@@ -69,18 +74,19 @@ class AvatarsUserViewModel @Inject constructor(
             }
     }
 
-    fun selectAvatar(uri: Uri) {
-        _state.update { it.copy(avatar = uri) }
+    fun selectAvatar(imageUrl: String) {
+        _state.update { it.copy(avatar = imageUrl) }
     }
 
     fun updateAvatarUser() {
         viewModelScope.launch {
-            val remotePath = extractFilePathFromUrl(_state.value.avatar.toString())
+            val remotePath = extractFilePathFromUrl(_state.value.avatar)
             val result = repository.updateAvatarUser(remotePath)
             when (result) {
                 is Resource.Success -> {
                     _uiEvent.send(UiEvent.Navigate)
                 }
+
                 is Resource.Error -> {
                     _uiEvent.send(UiEvent.ShowError(result.uiText))
                 }
@@ -100,8 +106,8 @@ class AvatarsUserViewModel @Inject constructor(
         return URLDecoder.decode(encodedFilePath, "UTF-8")
     }
 
-    private fun Uri.extractNumberFromString(): Int {
-        val str = this.toString()
+    private fun String.extractNumberFromString(): Int {
+        val str = this
         val prefix = "Artboards_Diversity_Avatars_by_Netguru-"
         val startIndexOfNumber = str.indexOf(prefix) + prefix.length
         if (startIndexOfNumber < prefix.length) {

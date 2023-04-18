@@ -22,13 +22,10 @@ import com.jefisu.manualplus.destinations.DetailScreenDestination
 import com.jefisu.manualplus.destinations.DirectionDestination
 import com.jefisu.manualplus.destinations.HomeScreenDestination
 import com.jefisu.manualplus.destinations.ProfileUserScreenDestination
-import com.jefisu.manualplus.features_manual.presentation.SharedViewModel
 import com.jefisu.manualplus.features_manual.presentation.home.HomeScreen
 import com.jefisu.manualplus.features_manual.presentation.home.HomeViewModel
-import com.jefisu.manualplus.features_manual.presentation.profile_user.ProfileUserScreen
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.manualcomposablecalls.composable
-import com.ramcosta.composedestinations.navigation.dependency
 import dagger.hilt.android.AndroidEntryPoint
 import io.realm.kotlin.mongodb.App
 import kotlinx.coroutines.launch
@@ -52,9 +49,6 @@ class MainActivity : ComponentActivity() {
         }
         cleanupCheck()
         setContent {
-            val sharedViewModel = hiltViewModel<SharedViewModel>()
-            val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
-
             ManualPLUSTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -63,31 +57,22 @@ class MainActivity : ComponentActivity() {
                     DestinationsNavHost(
                         navGraph = NavGraphs.root,
                         startRoute = getStartDestination(),
-                        dependenciesContainerBuilder = {
-                            dependency(sharedState)
-                        },
                         manualComposableCallsBuilder = {
                             composable(HomeScreenDestination) {
                                 val viewModel = hiltViewModel<HomeViewModel>()
                                 val state by viewModel.state.collectAsStateWithLifecycle()
 
                                 HomeScreen(
-                                    sharedState = sharedState,
                                     state = state,
-                                    loadUserData = sharedViewModel::getUser,
                                     onDataLoaded = { isLoading = false },
                                     navigateToDetail = { id, imageUrl ->
                                         destinationsNavigator.navigate(DetailScreenDestination(id, imageUrl))
                                     },
-                                    navigateToProfile = {
-                                        destinationsNavigator.navigate(ProfileUserScreenDestination)
+                                    navigateToProfile = { user, userProfile ->
+                                        destinationsNavigator.navigate(
+                                            ProfileUserScreenDestination(user, userProfile)
+                                        )
                                     }
-                                )
-                            }
-                            composable(ProfileUserScreenDestination) {
-                                ProfileUserScreen(
-                                    navController = navController,
-                                    sharedState = sharedState
                                 )
                             }
                         }

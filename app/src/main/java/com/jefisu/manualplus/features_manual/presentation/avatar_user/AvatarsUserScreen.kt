@@ -33,7 +33,6 @@ import com.jefisu.manualplus.core.presentation.components.AvatarImage
 import com.jefisu.manualplus.core.presentation.components.BottomSheet
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
-import com.jefisu.manualplus.features_manual.presentation.SharedState
 import com.jefisu.manualplus.features_manual.presentation.avatar_user.components.ShimmerEffectList
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -41,16 +40,13 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Destination
 @Composable
 fun AvatarsUserScreen(
-    sharedState: SharedState,
+    userProfile: String,
+    username: String?,
     navController: NavController,
     viewModel: AvatarsUserViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-
-    LaunchedEffect(key1 = Unit) {
-        viewModel.selectAvatar(sharedState.avatarUri)
-    }
 
     LaunchedEffect(key1 = viewModel.uiEvent) {
         viewModel.uiEvent.collect { event ->
@@ -96,7 +92,7 @@ fun AvatarsUserScreen(
                     )
                 }
                 Text(
-                    text = sharedState.user?.name ?: stringResource(R.string.user),
+                    text = username ?: stringResource(R.string.user),
                     style = MaterialTheme.typography.body2,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colors.onBackground,
@@ -110,7 +106,7 @@ fun AvatarsUserScreen(
                     color = MaterialTheme.colors.primary,
                     modifier = Modifier
                         .clickable(
-                            enabled = sharedState.avatarUri != state.avatar,
+                            enabled = userProfile != state.avatar,
                             onClick = viewModel::updateAvatarUser
                         )
                         .padding(MaterialTheme.spacing.small)
@@ -127,25 +123,25 @@ fun AvatarsUserScreen(
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                     userScrollEnabled = !state.isLoading
                 ) {
-                    itemsIndexed(state.availableAvatars) { i, uri ->
+                    itemsIndexed(state.availableAvatars) { i, avatarUrl ->
                         val size = state.availableAvatars.size
-                        val threeLastUri =
+                        val threeLastImage =
                             (size - state.availableAvatars.calculateNumberFromLastItems()) until size
                         Box(
                             modifier = Modifier.padding(
                                 top = if (i in 0..2) MaterialTheme.spacing.medium else MaterialTheme.spacing.default,
-                                bottom = if (i in threeLastUri) MaterialTheme.spacing.medium else MaterialTheme.spacing.default,
+                                bottom = if (i in threeLastImage) MaterialTheme.spacing.medium else MaterialTheme.spacing.default,
                             )
                         ) {
                             AvatarImage(
-                                image = uri,
+                                image = avatarUrl,
                                 size = 100.dp,
                                 offsetY = 14.dp,
-                                iconAction = if (state.avatar == uri) R.drawable.ic_check_circle else null,
+                                iconAction = if (state.avatar == avatarUrl) R.drawable.ic_check_circle else null,
                                 shapeIcon = CircleShape,
                                 iconColor = light_Primary,
                                 iconBackground = MaterialTheme.colors.background,
-                                onClick = { viewModel.selectAvatar(uri) },
+                                onClick = { viewModel.selectAvatar(avatarUrl) },
                                 modifier = Modifier.align(Alignment.Center)
                             )
                         }

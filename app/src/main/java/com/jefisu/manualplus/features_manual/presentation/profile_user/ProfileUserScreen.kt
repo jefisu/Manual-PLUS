@@ -31,7 +31,7 @@ import com.jefisu.manualplus.core.presentation.components.CustomTextField
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.destinations.AuthScreenDestination
 import com.jefisu.manualplus.destinations.AvatarsUserScreenDestination
-import com.jefisu.manualplus.features_manual.presentation.SharedState
+import com.jefisu.manualplus.features_manual.domain.User
 import com.jefisu.manualplus.features_manual.presentation.profile_user.components.BottomContentPattern
 import com.jefisu.manualplus.features_manual.presentation.profile_user.components.GalleryUploader
 import com.jefisu.manualplus.features_manual.presentation.profile_user.util.SettingsUser
@@ -45,8 +45,9 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun ProfileUserScreen(
+    user: User?,
+    userProfile: String,
     navController: NavController,
-    sharedState: SharedState,
     viewModel: ProfileUserViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -67,6 +68,7 @@ fun ProfileUserScreen(
                     )
                     sheetState.show()
                 }
+
                 is ProfileUserViewModel.UiEvent.SuccessMessage -> {
                     messageBarState.addSuccess(
                         event.uiText?.asString(context).orEmpty()
@@ -255,12 +257,12 @@ fun ProfileUserScreen(
                             .fillMaxWidth()
                     ) {
                         AvatarImage(
-                            image = sharedState.avatarUri,
+                            image = userProfile,
                             iconAction = R.drawable.ic_edit,
                             size = 100.dp,
                             offsetY = 11.dp,
                             onClick = {
-                                navController.navigate(AvatarsUserScreenDestination)
+                                navController.navigate(AvatarsUserScreenDestination(userProfile, user?.name))
                             }
                         )
                         Spacer(modifier = Modifier.width(24.dp))
@@ -268,13 +270,13 @@ fun ProfileUserScreen(
                             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
                         ) {
                             Text(
-                                text = sharedState.user?.name.orEmpty(),
+                                text = user?.name.orEmpty(),
                                 style = MaterialTheme.typography.h4,
                                 color = MaterialTheme.colors.background,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = sharedState.user?.email.orEmpty(),
+                                text = user?.email.orEmpty(),
                                 style = MaterialTheme.typography.body2,
                                 color = MaterialTheme.colors.background,
                                 overflow = TextOverflow.Ellipsis

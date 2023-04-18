@@ -1,13 +1,16 @@
 package com.jefisu.manualplus.core.presentation.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -17,12 +20,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import com.jefisu.manualplus.core.presentation.ui.theme.Background
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 
 @Composable
@@ -41,7 +44,7 @@ fun AvatarImage(
     isMirrored: Boolean = false,
     offsetY: Dp = 6.dp,
 ) {
-    val context = LocalContext.current
+    val painter = rememberAsyncImagePainter(model = image)
 
     Box(modifier = modifier) {
         Box(
@@ -54,13 +57,11 @@ fun AvatarImage(
                     onClick = onClick
                 )
         ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(image)
-                    .crossfade(true)
-                    .build(),
+            Image(
+                painter = painter,
                 contentDescription = null,
                 modifier = Modifier
+                    .fillMaxSize()
                     .align(Alignment.BottomCenter)
                     .offset(y = offsetY)
                     .scale(
