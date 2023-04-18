@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.jefisu.manualplus.R
+import com.jefisu.manualplus.core.presentation.ui.theme.Background
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.core.util.fetchImageFromFirebase
@@ -48,7 +49,7 @@ data class EquipmentInfo(
 @Composable
 fun ListItem(
     equipment: Equipment,
-    onClickNavigate: (Equipment, String) -> Unit,
+    onClickNavigate: (String) -> Unit,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.onBackground
 ) {
@@ -72,7 +73,7 @@ fun ListItem(
         modifier = Modifier
             .fillMaxWidth()
             .then(modifier)
-            .clickable { onClickNavigate(equipment, imageUrl) }
+            .clickable { onClickNavigate(imageUrl) }
     ) {
         Box(
             modifier = Modifier
@@ -86,7 +87,7 @@ fun ListItem(
 
             if (painter.state is AsyncImagePainter.State.Loading) {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colors.background,
+                    color = Background,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }

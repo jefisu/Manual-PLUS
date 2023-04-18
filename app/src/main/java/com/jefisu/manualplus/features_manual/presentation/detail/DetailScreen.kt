@@ -2,6 +2,7 @@ package com.jefisu.manualplus.features_manual.presentation.detail
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -51,11 +53,12 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.jefisu.manualplus.R
+import com.jefisu.manualplus.core.presentation.ui.theme.Background
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
-import com.jefisu.manualplus.features_manual.domain.Equipment
 import com.jefisu.manualplus.features_manual.presentation.detail.components.ConfigurationItem
 import com.jefisu.manualplus.features_manual.presentation.home.components.EquipmentInfo
 import com.ramcosta.composedestinations.annotation.Destination
@@ -66,8 +69,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun DetailScreen(
     id: String,
-    imageURL: String,
-    equipment: Equipment,
+    imageUrl: String,
     navigator: DestinationsNavigator,
     viewModel: DetailViewModel = hiltViewModel()
 ) {
@@ -87,212 +89,225 @@ fun DetailScreen(
             .decodeToString()
     }
 
-    val infos = listOf(
-        EquipmentInfo(equipment.serialNumber.toString(), R.drawable.ic_hash),
-        EquipmentInfo(equipment.releaseYear.toString(), R.drawable.ic_calendar),
-        EquipmentInfo(equipment.category, R.drawable.ic_category)
-    )
-    val bottomInfo =
-        listOf(stringResource(R.string.time_read, 10), equipment.createdAt)
-
-    MotionLayout(
-        motionScene = MotionScene(content = motionScene),
-        progress = progress,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.onBackground)
-    ) {
-        val containerProp by motionProperties("container")
-        val navigationIconProp by motionProperties("navigationIcon")
-        val nameProp by motionProperties("name")
-
-        Box(
-            modifier = Modifier
-                .layoutId(containerProp.id())
-                .clip(CutCornerShape(topStart = containerProp.distance("corner")))
-                .background(MaterialTheme.colors.background)
+    state.equipment?.let { equipment ->
+        val infos = listOf(
+            EquipmentInfo(equipment.serialNumber.toString(), R.drawable.ic_hash),
+            EquipmentInfo(equipment.releaseYear.toString(), R.drawable.ic_calendar),
+            EquipmentInfo(equipment.category, R.drawable.ic_category)
         )
-        IconButton(
-            onClick = navigator::navigateUp,
-            modifier = Modifier.layoutId(navigationIconProp.id())
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_back),
-                contentDescription = null,
-                tint = if (isSystemInDarkTheme()) navigationIconProp.color("darkColor") else navigationIconProp.color(
-                    "lightColor"
-                ),
-                modifier = Modifier.size(31.dp)
-            )
-        }
-        Box(
-            modifier = Modifier
-                .layoutId("image")
-                .width(155.dp)
-                .height(194.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(light_Primary)
-                .padding(12.dp)
-        ) {
-            AsyncImage(
-                model = imageURL,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        Text(
-            text = equipment.name.uppercase(),
-            style = MaterialTheme.typography.h5,
-            color = if (isSystemInDarkTheme()) nameProp.color("darkTextColor") else nameProp.color(
-                "lightTextColor"
-            ),
-            modifier = Modifier.layoutId(nameProp.id())
-        )
-        Column(
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
-            modifier = Modifier.layoutId("infos")
-        ) {
-            infos.forEachIndexed { i, info ->
-                val color = if (i == 0) {
-                    MaterialTheme.colors.background
-                } else MaterialTheme.colors.onBackground
+        val bottomInfo =
+            listOf(stringResource(R.string.time_read, 10), equipment.createdAt)
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(info.icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = color
-                    )
-                    Spacer(modifier = Modifier.width(24.dp))
-                    Text(
-                        text = info.name, style = MaterialTheme.typography.body2, color = color
-                    )
-                }
+        MotionLayout(
+            motionScene = MotionScene(content = motionScene),
+            progress = progress,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.onBackground)
+        ) {
+            val containerProp by motionProperties("container")
+            val navigationIconProp by motionProperties("navigationIcon")
+            val nameProp by motionProperties("name")
+
+            Box(
+                modifier = Modifier
+                    .layoutId(containerProp.id())
+                    .clip(CutCornerShape(topStart = containerProp.distance("corner")))
+                    .background(MaterialTheme.colors.background)
+            )
+            IconButton(
+                onClick = navigator::navigateUp,
+                modifier = Modifier.layoutId(navigationIconProp.id())
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = null,
+                    tint = if (isSystemInDarkTheme()) navigationIconProp.color("darkColor") else navigationIconProp.color(
+                        "lightColor"
+                    ),
+                    modifier = Modifier.size(31.dp)
+                )
             }
-        }
-        Column(
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
-            modifier = Modifier.layoutId("description")
-        ) {
-            Text(
-                text = stringResource(R.string.description).uppercase(),
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onBackground,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = equipment.description,
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onBackground.copy(0.7f),
-                maxLines = 5,
-                textAlign = TextAlign.Justify,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        Column(
-            modifier = Modifier.layoutId("stepByStep")
-        ) {
-            Text(
-                text = stringResource(R.string.step_by_step).uppercase(),
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onBackground,
-                fontWeight = FontWeight.Bold
-            )
-            if (state.configurations.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    Text(
-                        text = "Step by step not defined",
-                        style = MaterialTheme.typography.body1,
-                        color = MaterialTheme.colors.onBackground,
+
+            Box(
+                modifier = Modifier
+                    .layoutId("image")
+                    .width(155.dp)
+                    .height(194.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(light_Primary)
+                    .padding(12.dp)
+            ) {
+                val painter = rememberAsyncImagePainter(model = imageUrl)
+
+                if (painter.state is AsyncImagePainter.State.Loading) {
+                    CircularProgressIndicator(
+                        color = Background,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
-            } else {
-                LazyColumn(
-                    userScrollEnabled = progress == 1f
+
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            Text(
+                text = equipment.name.uppercase(),
+                style = MaterialTheme.typography.h5,
+                color = if (isSystemInDarkTheme()) nameProp.color("darkTextColor") else nameProp.color(
+                    "lightTextColor"
+                ),
+                modifier = Modifier.layoutId(nameProp.id())
+            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
+                modifier = Modifier.layoutId("infos")
+            ) {
+                infos.forEachIndexed { i, info ->
+                    val color = if (i == 0) {
+                        MaterialTheme.colors.background
+                    } else MaterialTheme.colors.onBackground
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(info.icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = color
+                        )
+                        Spacer(modifier = Modifier.width(24.dp))
+                        Text(
+                            text = info.name, style = MaterialTheme.typography.body2, color = color
+                        )
+                    }
+                }
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+                modifier = Modifier.layoutId("description")
+            ) {
+                Text(
+                    text = stringResource(R.string.description).uppercase(),
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onBackground,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = equipment.description,
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onBackground.copy(0.7f),
+                    maxLines = 5,
+                    textAlign = TextAlign.Justify,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Column(
+                modifier = Modifier.layoutId("stepByStep")
+            ) {
+                Text(
+                    text = stringResource(R.string.step_by_step).uppercase(),
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onBackground,
+                    fontWeight = FontWeight.Bold
+                )
+                if (state.configurations.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        Text(
+                            text = "Step by step not defined",
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.onBackground,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        userScrollEnabled = progress == 1f
+                    ) {
+                        itemsIndexed(state.configurations) { i, config ->
+                            ConfigurationItem(
+                                index = i + 1,
+                                configurationStep = config,
+                                enabledClick = animateToEnd
+                            )
+                        }
+                    }
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .layoutId("seeMore")
+                    .background(MaterialTheme.colors.background)
+            ) {
+                if (state.configurations.isNotEmpty()) {
+                    Text(
+                        text = stringResource(R.string.see_more),
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.onBackground,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(8.dp)
+                            .clickable { animateToEnd = true }
+                            .padding(4.dp)
+                    )
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .layoutId("bottomAction")
+                    .height(52.dp)
+                    .clip(RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp))
+                    .background(MaterialTheme.colors.onBackground)
+                    .padding(horizontal = 12.dp)
+            ) {
+                Button(
+                    onClick = { animateToEnd = false },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = MaterialTheme.colors.background,
+                        contentColor = MaterialTheme.colors.onBackground
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(34.dp)
                 ) {
-                    itemsIndexed(state.configurations) { i, config ->
-                        ConfigurationItem(
-                            index = i + 1,
-                            configurationStep = config,
-                            enabledClick = animateToEnd
+                    Text(
+                        text = stringResource(R.string.see_less),
+                        style = MaterialTheme.typography.body2,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                bottomInfo.forEach { info ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(34.dp)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colors.background,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                    ) {
+                        Text(
+                            text = info,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colors.background,
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
                 }
             }
         }
-        Box(
-            modifier = Modifier
-                .layoutId("seeMore")
-                .background(MaterialTheme.colors.background)
-        ) {
-            if (state.configurations.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.see_more),
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.onBackground,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(8.dp)
-                        .clickable { animateToEnd = true }
-                        .padding(4.dp)
-                )
-            }
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier
-                .layoutId("bottomAction")
-                .height(52.dp)
-                .clip(RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp))
-                .background(MaterialTheme.colors.onBackground)
-                .padding(horizontal = 12.dp)
-        ) {
-            Button(
-                onClick = { animateToEnd = false },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.colors.background,
-                    contentColor = MaterialTheme.colors.onBackground
-                ),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(34.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.see_less),
-                    style = MaterialTheme.typography.body2,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-            bottomInfo.forEach { info ->
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(34.dp)
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colors.background,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                ) {
-                    Text(
-                        text = info,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colors.background,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-            }
-        }
     }
+
 }

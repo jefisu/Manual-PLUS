@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 interface SyncRepository {
     fun getUser(): Flow<Resource<User>>
     fun getEquipments(): Flow<Resource<List<Equipment>>>
+    suspend fun getEquipmentById(id: String): Resource<Equipment>
     suspend fun getConfigurationEquipment(id: String): Resource<List<Configuration>>
     suspend fun updateUserInfo(name: String): SimpleResource
     suspend fun addSupportRequest(supportRequest: SupportRequest): SimpleResource

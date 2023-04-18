@@ -23,6 +23,7 @@ import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
+import io.realm.kotlin.query.find
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -40,7 +41,12 @@ class RealmSyncRepository(
     private val realm by lazy {
         val config = SyncConfiguration.Builder(
             user,
-            setOf(UserDto::class, EquipmentDto::class, SupportRequestDto::class, ConfigurationDto::class)
+            setOf(
+                UserDto::class,
+                EquipmentDto::class,
+                SupportRequestDto::class,
+                ConfigurationDto::class
+            )
         ).initialSubscriptions { sub ->
             add(query = sub.query<UserDto>("_id == $0", ObjectId(user.id)))
             add(query = sub.query<EquipmentDto>())
@@ -75,6 +81,19 @@ class RealmSyncRepository(
                 .flowOn(Dispatchers.IO)
         } catch (e: Exception) {
             flowOf(Resource.Error(UiText.unknownError()))
+        }
+    }
+
+    override suspend fun getEquipmentById(id: String): Resource<Equipment> {
+        return try {
+            realm
+                .query<EquipmentDto>("_id == $0", ObjectId(id))
+                .first()
+                .find {
+                    Resource.Success(it?.toEquipment())
+                }
+        } catch (e: Exception) {
+            Resource.Error(UiText.unknownError())
         }
     }
 

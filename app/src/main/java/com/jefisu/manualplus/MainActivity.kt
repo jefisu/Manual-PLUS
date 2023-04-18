@@ -31,8 +31,8 @@ import com.ramcosta.composedestinations.manualcomposablecalls.composable
 import com.ramcosta.composedestinations.navigation.dependency
 import dagger.hilt.android.AndroidEntryPoint
 import io.realm.kotlin.mongodb.App
-import javax.inject.Inject
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -76,14 +76,8 @@ class MainActivity : ComponentActivity() {
                                     state = state,
                                     loadUserData = sharedViewModel::getUser,
                                     onDataLoaded = { isLoading = false },
-                                    navigateToDetail = { equipment, imageURL ->
-                                        destinationsNavigator.navigate(
-                                            DetailScreenDestination(
-                                                id = equipment.id,
-                                                imageURL = imageURL,
-                                                equipment = equipment
-                                            )
-                                        )
+                                    navigateToDetail = { id, imageUrl ->
+                                        destinationsNavigator.navigate(DetailScreenDestination(id, imageUrl))
                                     },
                                     navigateToProfile = {
                                         destinationsNavigator.navigate(ProfileUserScreenDestination)

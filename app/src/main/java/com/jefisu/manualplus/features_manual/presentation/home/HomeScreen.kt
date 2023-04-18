@@ -29,7 +29,6 @@ import com.google.accompanist.pager.rememberPagerState
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.AvatarImage
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
-import com.jefisu.manualplus.features_manual.domain.Equipment
 import com.jefisu.manualplus.features_manual.presentation.SharedState
 import com.jefisu.manualplus.features_manual.presentation.home.components.ListItem
 import com.ramcosta.composedestinations.annotation.Destination
@@ -47,7 +46,7 @@ fun HomeScreen(
     sharedState: SharedState,
     loadUserData: () -> Unit,
     onDataLoaded: () -> Unit,
-    navigateToDetail: (Equipment, String) -> Unit,
+    navigateToDetail: (String, String) -> Unit,
     navigateToProfile: () -> Unit
 ) {
     val pagerState = rememberPagerState()
@@ -172,7 +171,9 @@ fun HomeScreen(
                     ) { equipment ->
                         ListItem(
                             equipment = equipment,
-                            onClickNavigate = navigateToDetail,
+                            onClickNavigate = { imageUrl ->
+                                navigateToDetail(equipment.id, imageUrl)
+                            },
                             modifier = Modifier.padding(
                                 start = 12.dp,
                                 end = 12.dp,
