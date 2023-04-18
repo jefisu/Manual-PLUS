@@ -81,7 +81,7 @@ class RealmSyncRepository(
     override suspend fun getConfigurationEquipment(id: String): Resource<List<Configuration>> {
         return try {
             realm
-                .query<ConfigurationDto>("equipmentId == $0", id)
+                .query<ConfigurationDto>("equipmentId == $0 SORT(orderNumber ASC)", id)
                 .find()
                 .toList()
                 .run {

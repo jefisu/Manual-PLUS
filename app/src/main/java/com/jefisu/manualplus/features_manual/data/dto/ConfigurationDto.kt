@@ -13,4 +13,5 @@ open class ConfigurationDto : RealmObject {
     var title: String = ""
     var imagePath: String = ""
     var stepByStep: RealmList<String> = realmListOf()
+    var orderNumber = 0
 }
