@@ -6,31 +6,27 @@ import com.jefisu.manualplus.core.data.entity.FileToUploadEntity
 import com.jefisu.manualplus.core.util.Resource
 import com.jefisu.manualplus.core.util.SimpleResource
 import com.jefisu.manualplus.core.util.UiText
+import com.jefisu.manualplus.features_manual.data.dto.ConfigItemDto
 import com.jefisu.manualplus.features_manual.data.dto.ConfigurationDto
 import com.jefisu.manualplus.features_manual.data.dto.EquipmentDto
 import com.jefisu.manualplus.features_manual.data.dto.SupportRequestDto
 import com.jefisu.manualplus.features_manual.data.dto.UserDto
-import com.jefisu.manualplus.features_manual.data.mapper.toConfiguration
 import com.jefisu.manualplus.features_manual.data.mapper.toEquipment
 import com.jefisu.manualplus.features_manual.data.mapper.toSupportRequestDto
-import com.jefisu.manualplus.features_manual.domain.Configuration
-import com.jefisu.manualplus.features_manual.domain.Equipment
-import com.jefisu.manualplus.features_manual.domain.SupportRequest
+import com.jefisu.manualplus.features_manual.data.mapper.toUser
 import com.jefisu.manualplus.features_manual.domain.SyncRepository
-import com.jefisu.manualplus.features_manual.domain.User
+import com.jefisu.manualplus.features_manual.domain.model.Equipment
+import com.jefisu.manualplus.features_manual.domain.model.SupportRequest
+import com.jefisu.manualplus.features_manual.domain.model.User
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
-import io.realm.kotlin.query.find
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import org.mongodb.kbson.BsonObjectId
-import org.mongodb.kbson.ObjectId
 
 class RealmSyncRepository(
     private val fileToUploadDao: FileToUploadDao,
@@ -45,14 +41,15 @@ class RealmSyncRepository(
                 UserDto::class,
                 EquipmentDto::class,
                 SupportRequestDto::class,
-                ConfigurationDto::class
+                ConfigurationDto::class,
+                ConfigItemDto::class
             )
         ).initialSubscriptions { sub ->
-            add(query = sub.query<UserDto>("_id == $0", ObjectId(user.id)))
+            add(query = sub.query<UserDto>("_id == $0", BsonObjectId(user.id)))
             add(query = sub.query<EquipmentDto>())
             add(query = sub.query<SupportRequestDto>())
-            add(query = sub.query<ConfigurationDto>())
         }
+            .schemaVersion(2)
             .log(LogLevel.ALL)
             .build()
 
@@ -62,11 +59,10 @@ class RealmSyncRepository(
     override fun getUser(): Flow<Resource<User>> {
         return try {
             realm
-                .query<UserDto>("_id == $0", ObjectId(user.id))
+                .query<UserDto>("_id == $0", BsonObjectId(user.id))
                 .first()
                 .asFlow()
                 .map { Resource.Success(it.obj?.toUser()) }
-                .flowOn(Dispatchers.IO)
         } catch (e: Exception) {
             flowOf(Resource.Error(UiText.unknownError()))
         }
@@ -78,50 +74,33 @@ class RealmSyncRepository(
                 .query<EquipmentDto>()
                 .asFlow()
                 .map { result -> Resource.Success(result.list.map { it.toEquipment() }) }
-                .flowOn(Dispatchers.IO)
         } catch (e: Exception) {
             flowOf(Resource.Error(UiText.unknownError()))
         }
     }
 
-    override suspend fun getEquipmentById(id: String): Resource<Equipment> {
+    override fun getEquipmentById(id: String): Flow<Resource<Equipment>> {
         return try {
             realm
-                .query<EquipmentDto>("_id == $0", ObjectId(id))
-                .first()
-                .find {
-                    Resource.Success(it?.toEquipment())
+                .query<EquipmentDto>("_id == $0", BsonObjectId(id))
+                .asFlow()
+                .map {
+                    Resource.Success(it.list.first().toEquipment())
                 }
         } catch (e: Exception) {
-            Resource.Error(UiText.unknownError())
-        }
-    }
-
-    override suspend fun getConfigurationEquipment(id: String): Resource<List<Configuration>> {
-        return try {
-            realm
-                .query<ConfigurationDto>("equipmentId == $0 SORT(orderNumber ASC)", id)
-                .find()
-                .toList()
-                .run {
-                    Resource.Success(this.map { it.toConfiguration() })
-                }
-        } catch (e: Exception) {
-            Resource.Error(UiText.unknownError())
+            flowOf(Resource.Error(UiText.unknownError()))
         }
     }
 
     override suspend fun updateUserInfo(name: String): SimpleResource {
         return try {
             realm.write {
-                val documentUser = query<UserDto>("_id == $0", BsonObjectId(user.id))
-                    .first()
+                query<UserDto>("_id == $0", BsonObjectId(user.id))
                     .find()
-                    ?: return@write Resource.Error<Unit>(UiText.StringResource(R.string.user_not_found))
-
-                documentUser.apply {
-                    this.name = name
-                }
+                    .first()
+                    .apply {
+                        this.name = name
+                    }
                 Resource.Success(Unit)
             }
         } catch (e: Exception) {
@@ -134,11 +113,9 @@ class RealmSyncRepository(
     override suspend fun addSupportRequest(supportRequest: SupportRequest): SimpleResource {
         return try {
             realm.write {
-                copyToRealm(
-                    supportRequest.toSupportRequestDto().apply {
-                        createdByUserId = user.id
-                    }
-                )
+                copyToRealm(supportRequest.toSupportRequestDto()).apply {
+                    createdByUserId = user.id
+                }
             }
             Resource.Success(Unit)
         } catch (e: Exception) {
@@ -155,14 +132,12 @@ class RealmSyncRepository(
     override suspend fun updateAvatarUser(remotePath: String): SimpleResource {
         return try {
             realm.write {
-                val documentUser = query<UserDto>("_id == $0", BsonObjectId(user.id))
-                    .first()
+                query<UserDto>("_id == $0", BsonObjectId(user.id))
                     .find()
-                    ?: return@write Resource.Error<Unit>(UiText.StringResource(R.string.user_not_found))
-
-                documentUser.apply {
-                    avatar = remotePath
-                }
+                    .first()
+                    .apply {
+                        avatar = remotePath
+                    }
                 Resource.Success(Unit)
             }
         } catch (e: Exception) {

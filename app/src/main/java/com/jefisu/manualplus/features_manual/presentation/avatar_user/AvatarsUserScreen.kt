@@ -18,21 +18,19 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.AvatarImage
 import com.jefisu.manualplus.core.presentation.components.BottomSheet
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
+import com.jefisu.manualplus.features_manual.domain.model.User
 import com.jefisu.manualplus.features_manual.presentation.avatar_user.components.ShimmerEffectList
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -40,19 +38,20 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Destination
 @Composable
 fun AvatarsUserScreen(
-    userProfile: String,
-    username: String?,
-    navController: NavController,
-    viewModel: AvatarsUserViewModel = hiltViewModel()
+    user: User?,
+    avatarUserUrl: String,
+    state: AvatarsUserState,
+    goBackToProfile: () -> Unit,
+    onEvent: (AvatarsUserEvent) -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    val avatarPainter = rememberAsyncImagePainter(model = state.avatar)
 
-    LaunchedEffect(key1 = viewModel.uiEvent) {
-        viewModel.uiEvent.collect { event ->
+    LaunchedEffect(key1 = state.uiEvent) {
+        state.uiEvent?.let { event ->
             when (event) {
                 is AvatarsUserViewModel.UiEvent.Navigate -> {
-                    navController.navigateUp()
+                    goBackToProfile()
                 }
                 is AvatarsUserViewModel.UiEvent.ShowError -> {
                     sheetState.show()
@@ -64,7 +63,7 @@ fun AvatarsUserScreen(
     BottomSheet(
         error = state.error?.asString().orEmpty(),
         sheetState = sheetState,
-        onOkClick = viewModel::errorDisplayed
+        onOkClick = { onEvent(AvatarsUserEvent.ErrorDisplayed) }
     ) {
         Column(
             modifier = Modifier
@@ -73,7 +72,7 @@ fun AvatarsUserScreen(
                 .padding(top = 12.dp)
         ) {
             AvatarImage(
-                image = state.avatar,
+                painter = avatarPainter,
                 clickEnabled = false,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
@@ -82,7 +81,7 @@ fun AvatarsUserScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 IconButton(
-                    onClick = navController::navigateUp,
+                    onClick = goBackToProfile,
                     modifier = Modifier.offset(x = (-4).dp)
                 ) {
                     Icon(
@@ -92,7 +91,7 @@ fun AvatarsUserScreen(
                     )
                 }
                 Text(
-                    text = username ?: stringResource(R.string.user),
+                    text = user?.name.orEmpty(),
                     style = MaterialTheme.typography.body2,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colors.onBackground,
@@ -105,10 +104,13 @@ fun AvatarsUserScreen(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colors.primary,
                     modifier = Modifier
-                        .clickable(
-                            enabled = userProfile != state.avatar,
-                            onClick = viewModel::updateAvatarUser
-                        )
+                        .clickable {
+                            if (avatarUserUrl == state.avatar) {
+                                goBackToProfile()
+                                return@clickable
+                            }
+                            onEvent(AvatarsUserEvent.SaveUserAvatar)
+                        }
                         .padding(MaterialTheme.spacing.small)
                 )
             }
@@ -127,6 +129,8 @@ fun AvatarsUserScreen(
                         val size = state.availableAvatars.size
                         val threeLastImage =
                             (size - state.availableAvatars.calculateNumberFromLastItems()) until size
+
+                        val avatarPainter = rememberAsyncImagePainter(model = avatarUrl)
                         Box(
                             modifier = Modifier.padding(
                                 top = if (i in 0..2) MaterialTheme.spacing.medium else MaterialTheme.spacing.default,
@@ -134,14 +138,14 @@ fun AvatarsUserScreen(
                             )
                         ) {
                             AvatarImage(
-                                image = avatarUrl,
+                                painter = avatarPainter,
                                 size = 100.dp,
                                 offsetY = 14.dp,
                                 iconAction = if (state.avatar == avatarUrl) R.drawable.ic_check_circle else null,
                                 shapeIcon = CircleShape,
                                 iconColor = light_Primary,
                                 iconBackground = MaterialTheme.colors.background,
-                                onClick = { viewModel.selectAvatar(avatarUrl) },
+                                onClick = { onEvent(AvatarsUserEvent.EnterAvatar(avatarUrl)) },
                                 modifier = Modifier.align(Alignment.Center)
                             )
                         }

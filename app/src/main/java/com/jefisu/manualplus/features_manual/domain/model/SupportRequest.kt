@@ -1,4 +1,4 @@
-package com.jefisu.manualplus.features_manual.domain
+package com.jefisu.manualplus.features_manual.domain.model
 
 import org.mongodb.kbson.BsonObjectId
 

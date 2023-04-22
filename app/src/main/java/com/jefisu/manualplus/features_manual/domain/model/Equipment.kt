@@ -1,9 +1,5 @@
-package com.jefisu.manualplus.features_manual.domain
+package com.jefisu.manualplus.features_manual.domain.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
-@Parcelize
 data class Equipment(
     val id: String,
     val name: String,
@@ -12,5 +8,6 @@ data class Equipment(
     val serialNumber: Int,
     val releaseYear: Int,
     val category: String,
-    val createdAt: String
-) : Parcelable
+    val createdAt: String,
+    val instructionsConfig: List<Configuration>
+)

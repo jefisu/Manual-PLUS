@@ -2,7 +2,7 @@ package com.jefisu.manualplus.core.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.*
+import java.util.UUID
 
 @Entity
 data class FileToUploadEntity(

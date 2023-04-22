@@ -10,15 +10,14 @@ import com.jefisu.manualplus.core.util.Resource
 import com.jefisu.manualplus.core.util.UiText
 import com.jefisu.manualplus.features_manual.domain.SyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.net.URL
 import java.net.URLDecoder
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AvatarsUserViewModel @Inject constructor(
@@ -29,12 +28,25 @@ class AvatarsUserViewModel @Inject constructor(
     private val _state = MutableStateFlow(AvatarsUserState())
     val state = _state.asStateFlow()
 
-    private val _uiEvent = Channel<UiEvent>()
-    val uiEvent = _uiEvent.receiveAsFlow()
-
     init {
-        savedStateHandle.get<String>("userProfile")?.let(::selectAvatar)
+        savedStateHandle.get<String>("avatarUserUrl")?.let { avatar ->
+            _state.update { it.copy(avatar = avatar) }
+        }
         loadAvailableAvatars()
+    }
+
+    fun onEvent(event: AvatarsUserEvent) {
+        when (event) {
+            is AvatarsUserEvent.EnterAvatar -> {
+                _state.update {
+                    it.copy(avatar = event.value)
+                }
+            }
+            is AvatarsUserEvent.ErrorDisplayed -> {
+                _state.update { it.copy(error = null) }
+            }
+            is AvatarsUserEvent.SaveUserAvatar -> updateAvatarUser()
+        }
     }
 
     private fun loadAvailableAvatars() {
@@ -74,28 +86,17 @@ class AvatarsUserViewModel @Inject constructor(
             }
     }
 
-    fun selectAvatar(imageUrl: String) {
-        _state.update { it.copy(avatar = imageUrl) }
-    }
-
-    fun updateAvatarUser() {
-        viewModelScope.launch {
+    private fun updateAvatarUser() {
+        viewModelScope.launch(Dispatchers.IO) {
             val remotePath = extractFilePathFromUrl(_state.value.avatar)
             val result = repository.updateAvatarUser(remotePath)
-            when (result) {
-                is Resource.Success -> {
-                    _uiEvent.send(UiEvent.Navigate)
-                }
-
-                is Resource.Error -> {
-                    _uiEvent.send(UiEvent.ShowError(result.uiText))
-                }
+            if (result is Resource.Error) {
+                _state.update { it.copy(uiEvent = UiEvent.ShowError(result.uiText)) }
+                return@launch
             }
-        }
-    }
 
-    fun errorDisplayed() {
-        _state.update { it.copy(error = null) }
+            _state.update { it.copy(uiEvent = UiEvent.Navigate) }
+        }
     }
 
     private fun extractFilePathFromUrl(url: String): String {

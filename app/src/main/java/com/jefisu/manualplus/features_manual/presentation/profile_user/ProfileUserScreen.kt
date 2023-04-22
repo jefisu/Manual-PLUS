@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -22,21 +23,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.AvatarImage
 import com.jefisu.manualplus.core.presentation.components.CustomTextField
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
-import com.jefisu.manualplus.destinations.AuthScreenDestination
-import com.jefisu.manualplus.destinations.AvatarsUserScreenDestination
-import com.jefisu.manualplus.features_manual.domain.User
+import com.jefisu.manualplus.features_manual.domain.model.User
 import com.jefisu.manualplus.features_manual.presentation.profile_user.components.BottomContentPattern
 import com.jefisu.manualplus.features_manual.presentation.profile_user.components.GalleryUploader
 import com.jefisu.manualplus.features_manual.presentation.profile_user.util.SettingsUser
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.navigate
 import com.stevdzasan.messagebar.ContentWithMessageBar
 import com.stevdzasan.messagebar.rememberMessageBarState
 import kotlinx.coroutines.launch
@@ -46,30 +41,36 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileUserScreen(
     user: User?,
-    userProfile: String,
-    navController: NavController,
-    viewModel: ProfileUserViewModel = hiltViewModel()
+    avatarPainter: Painter,
+    state: ProfileUserState,
+    navigateToAvatarsUser: () -> Unit,
+    goBackToHome: () -> Unit,
+    logoutUser: () -> Unit,
+    onEvent: (ProfileUserEvent) -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    val sheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val messageBarState = rememberMessageBarState()
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(key1 = viewModel.uiEvent) {
-        viewModel.uiEvent.collect { event ->
+    LaunchedEffect(key1 = state.uiEvent) {
+        state.uiEvent?.let { event ->
             when (event) {
-                is ProfileUserViewModel.UiEvent.HideBottomSheet -> sheetState.hide()
                 is ProfileUserViewModel.UiEvent.ErrorMessage -> {
-                    messageBarState.addError(
-                        Exception(event.uiText?.asString(context))
-                    )
-                    sheetState.show()
+                    sheetState.hide()
+                    if (!sheetState.isVisible) {
+                        messageBarState.addError(
+                            Exception(event.uiText?.asString(context))
+                        )
+                        sheetState.show()
+                    }
                 }
-
                 is ProfileUserViewModel.UiEvent.SuccessMessage -> {
+                    sheetState.hide()
                     messageBarState.addSuccess(
                         event.uiText?.asString(context).orEmpty()
                     )
@@ -83,6 +84,7 @@ fun ProfileUserScreen(
             sheetState = sheetState,
             sheetElevation = 0.dp,
             sheetShape = RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp),
+            scrimColor = Color.Black.copy(0.4f),
             sheetBackgroundColor = if (state.settings == SettingsUser.Logout) Color.Transparent else MaterialTheme.colors.background,
             sheetContent = {
                 if (state.isLoading) {
@@ -102,7 +104,9 @@ fun ProfileUserScreen(
                                 scope = scope,
                                 sheetState = sheetState,
                                 height = 219.dp,
-                                onSaveClick = viewModel::saveInfoUpdated,
+                                onSaveClick = {
+                                    onEvent(ProfileUserEvent.SaveChanges)
+                                },
                                 content = {
                                     Column(
                                         verticalArrangement = Arrangement.Center,
@@ -112,7 +116,9 @@ fun ProfileUserScreen(
                                     ) {
                                         CustomTextField(
                                             text = state.name,
-                                            onTextChange = viewModel::enteredName,
+                                            onTextChange = {
+                                                onEvent(ProfileUserEvent.EnterName(it))
+                                            },
                                             placeholderText = "John Doe",
                                             nameTextField = stringResource(R.string.name),
                                             iconView = R.drawable.ic_user,
@@ -131,12 +137,16 @@ fun ProfileUserScreen(
                                 sheetState = sheetState,
                                 height = 521.dp,
                                 textButton = stringResource(R.string.send),
-                                onSaveClick = viewModel::sendSupportRequest,
+                                onSaveClick = {
+                                    onEvent(ProfileUserEvent.SendSupportRequest)
+                                },
                                 content = {
                                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                                     CustomTextField(
                                         text = state.hospitalName,
-                                        onTextChange = viewModel::enteredHospitalName,
+                                        onTextChange = {
+                                            onEvent(ProfileUserEvent.EnterHospitalName(it))
+                                        },
                                         placeholderText = stringResource(R.string.enter_the_name_hospital),
                                         nameTextField = stringResource(R.string.hospital),
                                         iconView = R.drawable.ic_hospital,
@@ -147,7 +157,9 @@ fun ProfileUserScreen(
                                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                                     CustomTextField(
                                         text = state.hospitalAddress,
-                                        onTextChange = viewModel::enteredHospitalAddress,
+                                        onTextChange = {
+                                            onEvent(ProfileUserEvent.EnterHospitalAddress(it))
+                                        },
                                         placeholderText = stringResource(R.string.placeholder_address),
                                         nameTextField = stringResource(R.string.address),
                                         iconView = R.drawable.ic_location,
@@ -158,7 +170,9 @@ fun ProfileUserScreen(
                                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                                     OutlinedTextField(
                                         value = state.supportMessage,
-                                        onValueChange = viewModel::enteredSupportMessage,
+                                        onValueChange = {
+                                            onEvent(ProfileUserEvent.EnterSupportMessage(it))
+                                        },
                                         shape = RoundedCornerShape(16.dp),
                                         colors = TextFieldDefaults.outlinedTextFieldColors(
                                             backgroundColor = Color.Transparent,
@@ -178,7 +192,9 @@ fun ProfileUserScreen(
                                     GalleryUploader(
                                         modifier = Modifier.padding(start = 32.dp),
                                         pickedImages = state.imagesToUpload,
-                                        onSelectImages = viewModel::selectedImagesToUpload
+                                        onSelectImages = {
+                                            onEvent(ProfileUserEvent.EnterImages(it))
+                                        }
                                     )
                                 }
                             )
@@ -209,9 +225,7 @@ fun ProfileUserScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.logout()
-                                            navController.backQueue.clear()
-                                            navController.navigate(AuthScreenDestination)
+                                            logoutUser()
                                         }
                                         .padding(vertical = MaterialTheme.spacing.small)
                                 )
@@ -257,12 +271,12 @@ fun ProfileUserScreen(
                             .fillMaxWidth()
                     ) {
                         AvatarImage(
-                            image = userProfile,
+                            painter = avatarPainter,
                             iconAction = R.drawable.ic_edit,
                             size = 100.dp,
                             offsetY = 11.dp,
                             onClick = {
-                                navController.navigate(AvatarsUserScreenDestination(userProfile, user?.name))
+                                navigateToAvatarsUser()
                             }
                         )
                         Spacer(modifier = Modifier.width(24.dp))
@@ -273,18 +287,20 @@ fun ProfileUserScreen(
                                 text = user?.name.orEmpty(),
                                 style = MaterialTheme.typography.h4,
                                 color = MaterialTheme.colors.background,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
                             )
                             Text(
                                 text = user?.email.orEmpty(),
                                 style = MaterialTheme.typography.body2,
                                 color = MaterialTheme.colors.background,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
                             )
                         }
                     }
                     IconButton(
-                        onClick = navController::popBackStack,
+                        onClick = goBackToHome,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .offset(y = 25.dp)
@@ -308,7 +324,7 @@ fun ProfileUserScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                viewModel.selectSetting(setting)
+                                onEvent(ProfileUserEvent.SelectSetting(setting))
                                 scope.launch {
                                     sheetState.show()
                                 }

@@ -34,7 +34,7 @@ fun BottomSheet(
         sheetState = sheetState,
         sheetElevation = 0.dp,
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        scrimColor = Color.Black.copy(0.5f),
+        scrimColor = Color.Black.copy(0.4f),
         sheetContent = {
             Column(
                 modifier = Modifier

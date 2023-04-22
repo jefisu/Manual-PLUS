@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -20,17 +19,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import com.jefisu.manualplus.core.presentation.ui.theme.Background
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 
 @Composable
 fun AvatarImage(
-    image: Any,
+    painter: Painter,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     clickEnabled: Boolean = true,
@@ -42,10 +39,8 @@ fun AvatarImage(
     shape: Shape = CircleShape,
     background: Color = light_Primary,
     isMirrored: Boolean = false,
-    offsetY: Dp = 6.dp,
+    offsetY: Dp = 6.dp
 ) {
-    val painter = rememberAsyncImagePainter(model = image)
-
     Box(modifier = modifier) {
         Box(
             modifier = Modifier

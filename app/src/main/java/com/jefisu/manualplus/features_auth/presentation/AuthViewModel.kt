@@ -4,13 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jefisu.manualplus.core.connectivity.ConnectivityObserver
 import com.jefisu.manualplus.core.util.Resource
-import com.jefisu.manualplus.core.util.UiText
 import com.jefisu.manualplus.features_auth.domain.AuthRepository
 import com.jefisu.manualplus.features_auth.presentation.util.ValidateData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -19,23 +22,8 @@ class AuthViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
-    private val _loginState = MutableStateFlow(LoginState())
-    val loginState = _loginState.asStateFlow()
-
-    private val _signUpState = MutableStateFlow(SignUpState())
-    val signUpState = _signUpState.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
-
-    private val _isLoadingGoogle = MutableStateFlow(false)
-    val isLoadingGoogle = _isLoadingGoogle.asStateFlow()
-
-    private val _error = MutableStateFlow<UiText?>(null)
-    val error = _error.asStateFlow()
-
-    private val _navigateEvent = Channel<Boolean>()
-    val navigateEvent = _navigateEvent.receiveAsFlow()
+    private val _state = MutableStateFlow(AuthState())
+    val state = _state.asStateFlow()
 
     private val _connectivityStatus =
         MutableStateFlow<ConnectivityObserver.Status>(ConnectivityObserver.Status.Unavailable)
@@ -46,102 +34,146 @@ class AuthViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    fun enteredName(value: String) {
-        _signUpState.update { it.copy(repeatPassword = value) }
-    }
-
-    fun enteredEmail(value: String, isSigning: Boolean) {
-        if (isSigning) {
-            _signUpState.update { it.copy(email = value) }
-        } else {
-            _loginState.update { it.copy(email = value) }
-        }
-    }
-
-    fun enteredPassword(value: String, isSigning: Boolean) {
-        if (isSigning) {
-            _signUpState.update {
-                it.copy(password = value)
+    fun onEvent(event: AuthEvent) {
+        when (event) {
+            is AuthEvent.EnterEmail -> {
+                if (event.isSigning) {
+                    _state.update { it.copy(emailSignUp = event.value) }
+                } else {
+                    _state.update { it.copy(emailSignIn = event.value) }
+                }
             }
-        } else {
-            _loginState.update { it.copy(password = value) }
+            is AuthEvent.EnterPassword -> {
+                if (event.isSigning) {
+                    _state.update { it.copy(passwordSignUp = event.value) }
+                } else {
+                    _state.update { it.copy(passwordSignIn = event.value) }
+                }
+            }
+            is AuthEvent.EnterRepeatPassword -> {
+                _state.update { it.copy(repeatPasswordSignUp = event.value) }
+            }
+            is AuthEvent.ErrorDisplayed -> {
+                _state.update { it.copy(error = null) }
+            }
+            is AuthEvent.LoginEmail -> login()
+            is AuthEvent.LoginGoogle -> loginWithGoogle(event.result)
+            is AuthEvent.SignUp -> signUp()
         }
     }
 
-    fun errorDisplayed() {
-        _error.update { null }
-    }
-
-    fun login() {
+    private fun login() {
         if (_connectivityStatus.value is ConnectivityObserver.Status.Unavailable) {
-            _error.update { _connectivityStatus.value.uiText }
+            _state.update { it.copy(error = _connectivityStatus.value.uiText) }
             return
         }
-        viewModelScope.launch {
-            _error.update { null }
-
-            _isLoading.update { true }
-            val result = repository.login(_loginState.value.email, _loginState.value.password)
-            if (result is Resource.Error) {
-                _error.update { result.uiText }
-            } else {
-                _navigateEvent.send(true)
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.update {
+                it.copy(
+                    error = null,
+                    isLoading = true,
+                    showLoadingButton = LoadingButton.NormalLogin
+                )
             }
-            _isLoading.update { false }
+
+            val result = repository.login(_state.value.emailSignIn, _state.value.passwordSignIn)
+            if (result is Resource.Error) {
+                _state.update {
+                    it.copy(error = result.uiText)
+                }
+            } else {
+                _state.update {
+                    it.copy(canNavigate = true)
+                }
+            }
+            _state.update {
+                it.copy(isLoading = false, showLoadingButton = null)
+            }
         }
     }
 
-    fun loginWithGoogle(tokenResult: Resource<String>) {
+    private fun loginWithGoogle(tokenResult: Resource<String>) {
         if (_connectivityStatus.value is ConnectivityObserver.Status.Unavailable) {
-            _error.update { _connectivityStatus.value.uiText }
+            _state.update { it.copy(error = _connectivityStatus.value.uiText) }
             return
         }
         when (tokenResult) {
-            is Resource.Error -> _error.update { tokenResult.uiText }
+            is Resource.Error -> {
+                _state.update {
+                    it.copy(error = tokenResult.uiText)
+                }
+            }
             is Resource.Success -> {
-                _isLoadingGoogle.update { true }
-                viewModelScope.launch {
+                _state.update {
+                    it.copy(
+                        error = null,
+                        isLoading = true,
+                        showLoadingButton = LoadingButton.Google
+                    )
+                }
+                viewModelScope.launch(Dispatchers.IO) {
                     val result = repository.loginGoogle(tokenResult.data!!)
                     if (result is Resource.Error) {
-                        _error.update { result.uiText }
+                        _state.update { it.copy(error = result.uiText) }
                         return@launch
                     }
-                    _navigateEvent.send(true)
-                    _isLoadingGoogle.update { false }
+                    _state.update {
+                        it.copy(
+                            canNavigate = true,
+                            isLoading = false,
+                            showLoadingButton = null
+                        )
+                    }
                 }
             }
         }
     }
 
-    fun signUp() {
+    private fun signUp() {
         if (_connectivityStatus.value is ConnectivityObserver.Status.Unavailable) {
-            _error.update { _connectivityStatus.value.uiText }
+            _state.update { it.copy(error = _connectivityStatus.value.uiText) }
             return
         }
-        viewModelScope.launch {
-            _error.update { null }
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.update { it.copy(error = null) }
 
-            val emailResult = ValidateData.validateEmail(_signUpState.value.email)
-            val passwordResult = ValidateData.validatePassword(_signUpState.value.password)
+            val emailResult = ValidateData.validateEmail(_state.value.emailSignUp)
+            val passwordResult = ValidateData.validatePassword(_state.value.passwordSignUp)
             val repeatPasswordResult = ValidateData.validateRepeatedPassword(
-                password = _signUpState.value.password,
-                repeatedPassword = _signUpState.value.repeatPassword
+                password = _state.value.passwordSignUp,
+                repeatedPassword = _state.value.repeatPasswordSignUp
             )
             val validationsResult = listOf(emailResult, passwordResult, repeatPasswordResult)
             if (validationsResult.any { it.error != null }) {
-                _error.update { validationsResult.firstNotNullOf { it.error } }
-                _isLoading.update { false }
+                _state.update { state ->
+                    state.copy(error = validationsResult.firstNotNullOf { it.error })
+                }
                 return@launch
             }
 
-            _isLoading.update { true }
-            val result = repository.signUp(_signUpState.value.email, _signUpState.value.password)
-            if (result is Resource.Error) {
-                _error.update { result.uiText }
-            } else {
-                _navigateEvent.send(true)
+            _state.update { state ->
+                state.copy(isLoading = true, showLoadingButton = LoadingButton.SignUp)
             }
-            _isLoading.update { false }
+            val result = repository.signUp(_state.value.emailSignUp, _state.value.passwordSignUp)
+            if (result is Resource.Error) {
+                _state.update { state ->
+                    state.copy(error = result.uiText)
+                }
+                return@launch
+            }
+            _state.update {
+                it.copy(
+                    canNavigate = true,
+                    isLoading = false,
+                    showLoadingButton = null
+                )
+            }
         }
+    }
+
+    sealed class LoadingButton {
+        object SignUp : LoadingButton()
+        object Google : LoadingButton()
+        object NormalLogin : LoadingButton()
     }
 }

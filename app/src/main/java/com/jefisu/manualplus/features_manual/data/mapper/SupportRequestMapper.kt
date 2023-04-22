@@ -1,7 +1,7 @@
 package com.jefisu.manualplus.features_manual.data.mapper
 
 import com.jefisu.manualplus.features_manual.data.dto.SupportRequestDto
-import com.jefisu.manualplus.features_manual.domain.SupportRequest
+import com.jefisu.manualplus.features_manual.domain.model.SupportRequest
 import io.realm.kotlin.ext.toRealmList
 
 fun SupportRequest.toSupportRequestDto(): SupportRequestDto {

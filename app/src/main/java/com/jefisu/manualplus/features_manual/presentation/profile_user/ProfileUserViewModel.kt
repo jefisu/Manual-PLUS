@@ -10,18 +10,16 @@ import com.jefisu.manualplus.core.data.entity.FileToUploadEntity
 import com.jefisu.manualplus.core.util.Resource
 import com.jefisu.manualplus.core.util.UiText
 import com.jefisu.manualplus.core.util.uploadFile
-import com.jefisu.manualplus.features_manual.domain.ImageUpload
-import com.jefisu.manualplus.features_manual.domain.SupportRequest
 import com.jefisu.manualplus.features_manual.domain.SyncRepository
-import com.jefisu.manualplus.features_manual.presentation.profile_user.util.SettingsUser
+import com.jefisu.manualplus.features_manual.domain.model.ImageUpload
+import com.jefisu.manualplus.features_manual.domain.model.SupportRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.mongodb.App
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -35,73 +33,86 @@ class ProfileUserViewModel @Inject constructor(
     private val _state = MutableStateFlow(ProfileUserState())
     val state = _state.asStateFlow()
 
-    private val _uiEvent = Channel<UiEvent>()
-    val uiEvent = _uiEvent.receiveAsFlow()
+    private var _imageUploads = mutableListOf<ImageUpload>()
 
-    private var imageUploads = mutableListOf<ImageUpload>()
-
-    fun enteredName(value: String) {
-        _state.update { it.copy(name = value) }
+    fun onEvent(event: ProfileUserEvent) {
+        when (event) {
+            is ProfileUserEvent.EnterName -> {
+                _state.update { it.copy(name = event.value) }
+            }
+            is ProfileUserEvent.EnterHospitalName -> {
+                _state.update { it.copy(hospitalName = event.value) }
+            }
+            is ProfileUserEvent.EnterHospitalAddress -> {
+                _state.update { it.copy(hospitalAddress = event.value) }
+            }
+            is ProfileUserEvent.EnterSupportMessage -> {
+                _state.update { it.copy(supportMessage = event.value) }
+            }
+            is ProfileUserEvent.EnterImages -> {
+                _state.update { it.copy(imagesToUpload = event.value) }
+            }
+            is ProfileUserEvent.SelectSetting -> {
+                _state.update { it.copy(settings = event.value) }
+            }
+            is ProfileUserEvent.Logout -> logout()
+            is ProfileUserEvent.SaveChanges -> saveInfoUpdated()
+            is ProfileUserEvent.SendSupportRequest -> sendSupportRequest()
+        }
     }
 
-    fun enteredHospitalName(value: String) {
-        _state.update { it.copy(hospitalName = value) }
-    }
-
-    fun enteredHospitalAddress(value: String) {
-        _state.update { it.copy(hospitalAddress = value) }
-    }
-
-    fun enteredSupportMessage(value: String) {
-        _state.update { it.copy(supportMessage = value) }
-    }
-
-    fun selectSetting(settings: SettingsUser) {
-        _state.update { it.copy(settings = settings) }
-    }
-
-    fun selectedImagesToUpload(uris: List<Uri>) {
-        _state.update { it.copy(imagesToUpload = it.imagesToUpload + uris) }
-    }
-
-    fun saveInfoUpdated() {
-        viewModelScope.launch {
+    private fun saveInfoUpdated() {
+        viewModelScope.launch(Dispatchers.IO) {
             if (_state.value.name.isBlank()) {
-                _uiEvent.send(
-                    UiEvent.ErrorMessage(UiText.StringResource(R.string.fields_can_t_be_blank))
-                )
+                _state.update {
+                    it.copy(
+                        uiEvent = UiEvent.SuccessMessage(
+                            UiText.StringResource(R.string.fields_can_t_be_blank)
+                        )
+                    )
+                }
                 return@launch
             }
 
             val result = repository.updateUserInfo(_state.value.name)
-            when (result) {
-                is Resource.Error -> _uiEvent.send(UiEvent.ErrorMessage(result.uiText))
-                is Resource.Success -> {
-                    enteredName("")
-                    _uiEvent.send(UiEvent.HideBottomSheet)
-                    _uiEvent.send(
-                        UiEvent.SuccessMessage(UiText.StringResource(R.string.the_data_has_been_updated_successfully))
+            if (result is Resource.Error) {
+                _state.update { it.copy(uiEvent = UiEvent.ErrorMessage(result.uiText)) }
+                return@launch
+            }
+
+            onEvent(ProfileUserEvent.EnterName(""))
+            _state.update {
+                it.copy(
+                    name = "",
+                    uiEvent = UiEvent.SuccessMessage(
+                        UiText.StringResource(R.string.the_data_has_been_updated_successfully)
                     )
-                }
+                )
             }
         }
     }
 
-    fun logout() {
+    private fun logout() {
         viewModelScope.launch {
             app.currentUser?.logOut()
         }
     }
 
-    fun sendSupportRequest() {
-        viewModelScope.launch {
+    private fun sendSupportRequest() {
+        viewModelScope.launch(Dispatchers.IO) {
             val areBlank = listOf(
                 _state.value.hospitalName,
                 _state.value.hospitalAddress,
                 _state.value.supportMessage
             ).any { it.isBlank() }
             if (areBlank) {
-                _uiEvent.send(UiEvent.ErrorMessage(UiText.StringResource(R.string.fields_can_t_be_blank)))
+                _state.update {
+                    it.copy(
+                        uiEvent = UiEvent.ErrorMessage(
+                            UiText.StringResource(R.string.fields_can_t_be_blank)
+                        )
+                    )
+                }
                 return@launch
             }
 
@@ -117,36 +128,45 @@ class ProfileUserViewModel @Inject constructor(
                 val remotePath =
                     "imagens/support_request/${supportRequest.id.toHexString()}/${UUID.randomUUID()}.$imageType"
                 ImageUpload(uri, remotePath)
-            }.also(imageUploads::addAll)
+            }.also(_imageUploads::addAll)
 
             val result = repository.addSupportRequest(
-                supportRequest.copy(remotePathImages = imageUploads.map { it.remotePath })
+                supportRequest.copy(remotePathImages = _imageUploads.map { it.remotePath })
             )
-            when (result) {
-                is Resource.Error -> {
-                    _uiEvent.send(
-                        UiEvent.ErrorMessage(UiText.StringResource(R.string.failed_try_send_support_request))
+            if (result is Resource.Error) {
+                _state.update {
+                    it.copy(
+                        uiEvent = UiEvent.ErrorMessage(
+                            UiText.StringResource(R.string.failed_try_send_support_request)
+                        )
                     )
                 }
-                is Resource.Success -> {
-                    uploadToFirebase()
-                    _uiEvent.send(UiEvent.HideBottomSheet)
-                    _uiEvent.send(
-                        UiEvent.SuccessMessage(UiText.StringResource(R.string.support_request_registered_successfully))
+                return@launch
+            }
+
+            uploadToFirebase()
+            _state.update {
+                it.copy(
+                    uiEvent = UiEvent.SuccessMessage(
+                        UiText.StringResource(R.string.support_request_registered_successfully)
                     )
-                    imageUploads.clear()
-                    enteredHospitalName("")
-                    enteredHospitalAddress("")
-                    enteredSupportMessage("")
-                    selectedImagesToUpload(emptyList())
-                }
+                )
+            }
+            _imageUploads.clear()
+            _state.update {
+                it.copy(
+                    hospitalName = "",
+                    hospitalAddress = "",
+                    supportMessage = "",
+                    imagesToUpload = emptyList()
+                )
             }
         }
     }
 
     private fun uploadToFirebase() {
         val storage = FirebaseStorage.getInstance()
-        imageUploads.forEach { imageUpload ->
+        _imageUploads.forEach { imageUpload ->
             storage.uploadFile(
                 uri = imageUpload.uri,
                 remotePath = imageUpload.remotePath,
@@ -174,6 +194,5 @@ class ProfileUserViewModel @Inject constructor(
     sealed class UiEvent {
         data class ErrorMessage(val uiText: UiText?) : UiEvent()
         data class SuccessMessage(val uiText: UiText?) : UiEvent()
-        object HideBottomSheet : UiEvent()
     }
 }

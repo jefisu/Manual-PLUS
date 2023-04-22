@@ -16,7 +16,6 @@
     <string name="the_password_needs_8_characters">The password needs to consist of at least 8 characters</string>
     <string name="the_password_not_contain_letter_and_digit">The password needs to contain at least one letter and digit</string>
     <string name="password_not_equals">The passwords don\'t match</string>
-    <string name="user_not_found">User not found</string>
     <string name="write_your_problem_here">Write your problem here...</string>
     <string name="placeholder_address">233 Paulista Avenue, São Paulo, SP 01310-100</string>
     <string name="enter_the_name_hospital">Enter the name of your hospital</string>
@@ -26,8 +25,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="name">Name</string>
-    <string name="close">Close</string>
-    <string name="delete">Delete</string>
     <string name="save">Save</string>
     <string name="good_morning">good morning</string>
     <string name="good_afternoon">good afternoon</string>
@@ -37,7 +34,6 @@
     <string name="step_by_step">Step by Step</string>
     <string name="see_more">See more</string>
     <string name="see_less">See less</string>
-    <string name="user">User</string>
     <string name="sign_up">Sign Up</string>
     <string name="digit_your_password">Digit your password</string>
     <string name="password">Password</string>

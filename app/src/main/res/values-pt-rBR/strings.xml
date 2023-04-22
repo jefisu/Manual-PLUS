@@ -16,7 +16,6 @@
     <string name="the_password_needs_8_characters">A senha precisa ter pelo menos 8 caracteres</string>
     <string name="the_password_not_contain_letter_and_digit">A senha precisa conter pelo menos uma letra e um número</string>
     <string name="password_not_equals">As senhas não coincidem</string>
-    <string name="user_not_found">Usuário não encontrado</string>
     <string name="write_your_problem_here">Escreva seu problema aqui…</string>
     <string name="placeholder_address">Avenida Paulista, 233 – São Paulo, SP 01310–100</string>
     <string name="enter_the_name_hospital">Digite o nome do seu hospital</string>
@@ -26,8 +25,6 @@
     <string name="yes">Sim</string>
     <string name="no">Não</string>
     <string name="name">Nome</string>
-    <string name="close">Fechar</string>
-    <string name="delete">Excluir</string>
     <string name="save">Salvar</string>
     <string name="good_morning">bom dia</string>
     <string name="good_afternoon">boa tarde</string>
@@ -37,7 +34,6 @@
     <string name="step_by_step">Passo a Passo</string>
     <string name="see_more">Ver mais</string>
     <string name="see_less">Ver menos</string>
-    <string name="user">Usuário</string>
     <string name="sign_up">Cadastrar-se</string>
     <string name="digit_your_password">Digite sua senha</string>
     <string name="password">Senha</string>

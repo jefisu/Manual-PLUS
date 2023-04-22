@@ -3,11 +3,9 @@ package com.jefisu.manualplus.core.util
 import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storageMetadata
-import timber.log.Timber
 
-fun fetchImageFromFirebase(remotePath: String?, response: (Uri) -> Unit) {
+fun fetchImageFromFirebase(remotePath: String?, onSuccess: (Uri) -> Unit) {
     if (remotePath.isNullOrBlank()) {
-        Timber.d("Invalid remote path")
         return
     }
     FirebaseStorage.getInstance()
@@ -15,7 +13,7 @@ fun fetchImageFromFirebase(remotePath: String?, response: (Uri) -> Unit) {
         .child(remotePath)
         .downloadUrl
         .addOnSuccessListener {
-            response(it)
+            onSuccess(it)
         }
 }
 

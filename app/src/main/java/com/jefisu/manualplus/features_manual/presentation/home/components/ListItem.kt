@@ -30,16 +30,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.ui.theme.Background
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.core.util.fetchImageFromFirebase
-import com.jefisu.manualplus.features_manual.domain.Equipment
+import com.jefisu.manualplus.features_manual.domain.model.Equipment
+import kotlinx.coroutines.Dispatchers
 
 data class EquipmentInfo(
     val name: String,
@@ -59,12 +62,13 @@ fun ListItem(
         EquipmentInfo(equipment.category, R.drawable.ic_category)
     )
     var imageUrl by rememberSaveable { mutableStateOf("") }
+    val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit) {
         if (imageUrl.isBlank()) {
             fetchImageFromFirebase(
                 remotePath = equipment.image,
-                response = { imageUrl = it.toString() }
+                onSuccess = { imageUrl = it.toString() }
             )
         }
     }
@@ -83,7 +87,13 @@ fun ListItem(
                 .background(light_Primary)
                 .padding(12.dp)
         ) {
-            val painter = rememberAsyncImagePainter(model = imageUrl)
+            val painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .crossfade(true)
+                    .decoderDispatcher(Dispatchers.IO)
+                    .build()
+            )
 
             if (painter.state is AsyncImagePainter.State.Loading) {
                 CircularProgressIndicator(

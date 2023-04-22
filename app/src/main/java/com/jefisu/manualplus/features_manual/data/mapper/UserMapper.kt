@@ -1,7 +1,7 @@
-package com.jefisu.manualplus.features_manual.data
+package com.jefisu.manualplus.features_manual.data.mapper
 
 import com.jefisu.manualplus.features_manual.data.dto.UserDto
-import com.jefisu.manualplus.features_manual.domain.User
+import com.jefisu.manualplus.features_manual.domain.model.User
 
 fun UserDto.toUser(): User {
     return User(

@@ -7,6 +7,8 @@ import com.jefisu.manualplus.core.connectivity.ConnectivityObserver
 import com.jefisu.manualplus.core.connectivity.NetworkConnectivityObserver
 import com.jefisu.manualplus.core.data.FileDatabase
 import com.jefisu.manualplus.core.data.FileToUploadDao
+import com.jefisu.manualplus.features_manual.data.RealmSyncRepository
+import com.jefisu.manualplus.features_manual.domain.SyncRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,5 +38,14 @@ object AppModule {
             FileDatabase::class.java,
             "filesToUpload_db"
         ).build().fileToUploadDao
+    }
+
+    @Provides
+    @Singleton
+    fun provideSyncRepository(
+        fileToUploadDao: FileToUploadDao,
+        app: App
+    ): SyncRepository {
+        return RealmSyncRepository(fileToUploadDao, app)
     }
 }

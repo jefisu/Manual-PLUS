@@ -1,7 +1,12 @@
 package com.jefisu.manualplus.features_manual.presentation.detail
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,8 +56,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ExperimentalMotionApi
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.jefisu.manualplus.R
@@ -62,24 +65,17 @@ import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.features_manual.presentation.detail.components.ConfigurationItem
 import com.jefisu.manualplus.features_manual.presentation.home.components.EquipmentInfo
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @OptIn(ExperimentalMotionApi::class)
-@Destination
+@Destination(navArgsDelegate = DetailNavArgs::class)
 @Composable
 fun DetailScreen(
-    id: String,
-    imageUrl: String,
-    navigator: DestinationsNavigator,
-    viewModel: DetailViewModel = hiltViewModel()
+    state: DetailState,
+    onClickGoBackHome: () -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
     var animateToEnd by rememberSaveable { mutableStateOf(false) }
     val progress by animateFloatAsState(
-        targetValue = if (animateToEnd) 1f else 0f,
-        animationSpec = tween(1500),
-        label = ""
+        targetValue = if (animateToEnd) 1f else 0f, animationSpec = tween(1500), label = ""
     )
     val context = LocalContext.current
     val motionScene = remember {
@@ -89,225 +85,239 @@ fun DetailScreen(
             .decodeToString()
     }
 
-    state.equipment?.let { equipment ->
-        val infos = listOf(
-            EquipmentInfo(equipment.serialNumber.toString(), R.drawable.ic_hash),
-            EquipmentInfo(equipment.releaseYear.toString(), R.drawable.ic_calendar),
-            EquipmentInfo(equipment.category, R.drawable.ic_category)
-        )
-        val bottomInfo =
-            listOf(stringResource(R.string.time_read, 10), equipment.createdAt)
-
-        MotionLayout(
-            motionScene = MotionScene(content = motionScene),
-            progress = progress,
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.onBackground)
+    ) {
+        if (state.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+        AnimatedVisibility(
+            visible = state.equipment != null,
+            enter = fadeIn() + slideInVertically { it },
+            exit = fadeOut() + slideOutVertically { it },
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.onBackground)
+                .align(Alignment.BottomCenter),
         ) {
-            val containerProp by motionProperties("container")
-            val navigationIconProp by motionProperties("navigationIcon")
-            val nameProp by motionProperties("name")
-
-            Box(
-                modifier = Modifier
-                    .layoutId(containerProp.id())
-                    .clip(CutCornerShape(topStart = containerProp.distance("corner")))
-                    .background(MaterialTheme.colors.background)
-            )
-            IconButton(
-                onClick = navigator::navigateUp,
-                modifier = Modifier.layoutId(navigationIconProp.id())
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_arrow_back),
-                    contentDescription = null,
-                    tint = if (isSystemInDarkTheme()) navigationIconProp.color("darkColor") else navigationIconProp.color(
-                        "lightColor"
-                    ),
-                    modifier = Modifier.size(31.dp)
+            state.equipment?.let { equipment ->
+                val infos = listOf(
+                    EquipmentInfo(equipment.serialNumber.toString(), R.drawable.ic_hash),
+                    EquipmentInfo(equipment.releaseYear.toString(), R.drawable.ic_calendar),
+                    EquipmentInfo(equipment.category, R.drawable.ic_category)
                 )
-            }
+                val bottomInfo = listOf(stringResource(R.string.time_read, 10), equipment.createdAt)
 
-            Box(
-                modifier = Modifier
-                    .layoutId("image")
-                    .width(155.dp)
-                    .height(194.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(light_Primary)
-                    .padding(12.dp)
-            ) {
-                val painter = rememberAsyncImagePainter(model = imageUrl)
-
-                if (painter.state is AsyncImagePainter.State.Loading) {
-                    CircularProgressIndicator(
-                        color = Background,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-
-                Image(
-                    painter = painter,
-                    contentDescription = null,
+                MotionLayout(
+                    motionScene = MotionScene(content = motionScene),
+                    progress = progress,
                     modifier = Modifier.fillMaxSize()
-                )
-            }
-            Text(
-                text = equipment.name.uppercase(),
-                style = MaterialTheme.typography.h5,
-                color = if (isSystemInDarkTheme()) nameProp.color("darkTextColor") else nameProp.color(
-                    "lightTextColor"
-                ),
-                modifier = Modifier.layoutId(nameProp.id())
-            )
-            Column(
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
-                modifier = Modifier.layoutId("infos")
-            ) {
-                infos.forEachIndexed { i, info ->
-                    val color = if (i == 0) {
-                        MaterialTheme.colors.background
-                    } else MaterialTheme.colors.onBackground
+                ) {
+                    val containerProp by motionProperties("container")
+                    val navigationIconProp by motionProperties("navigationIcon")
+                    val nameProp by motionProperties("name")
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(info.icon),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = color
-                        )
-                        Spacer(modifier = Modifier.width(24.dp))
-                        Text(
-                            text = info.name, style = MaterialTheme.typography.body2, color = color
-                        )
-                    }
-                }
-            }
-            Column(
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
-                modifier = Modifier.layoutId("description")
-            ) {
-                Text(
-                    text = stringResource(R.string.description).uppercase(),
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.onBackground,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = equipment.description,
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onBackground.copy(0.7f),
-                    maxLines = 5,
-                    textAlign = TextAlign.Justify,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Column(
-                modifier = Modifier.layoutId("stepByStep")
-            ) {
-                Text(
-                    text = stringResource(R.string.step_by_step).uppercase(),
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.onBackground,
-                    fontWeight = FontWeight.Bold
-                )
-                if (state.configurations.isEmpty()) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
+                            .layoutId(containerProp.id())
+                            .clip(CutCornerShape(topStart = containerProp.distance("corner")))
+                            .background(MaterialTheme.colors.background)
+                    )
+                    IconButton(
+                        onClick = onClickGoBackHome,
+                        modifier = Modifier.layoutId(navigationIconProp.id())
                     ) {
-                        Text(
-                            text = "Step by step not defined",
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.onBackground,
-                            modifier = Modifier.align(Alignment.Center)
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = null,
+                            tint = if (isSystemInDarkTheme()) navigationIconProp.color("darkColor") else navigationIconProp.color(
+                                "lightColor"
+                            ),
+                            modifier = Modifier.size(31.dp)
                         )
                     }
-                } else {
-                    LazyColumn(
-                        userScrollEnabled = progress == 1f
+
+                    Box(
+                        modifier = Modifier
+                            .layoutId("image")
+                            .width(155.dp)
+                            .height(194.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(light_Primary)
+                            .padding(12.dp)
                     ) {
-                        itemsIndexed(state.configurations) { i, config ->
-                            ConfigurationItem(
-                                index = i + 1,
-                                configurationStep = config,
-                                enabledClick = animateToEnd
+                        val painter = rememberAsyncImagePainter(model = state.imageUrl)
+
+                        if (painter.state is AsyncImagePainter.State.Loading) {
+                            CircularProgressIndicator(
+                                color = Background, modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+
+                        Image(
+                            painter = painter,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    Text(
+                        text = equipment.name.uppercase(),
+                        style = MaterialTheme.typography.h5,
+                        color = if (isSystemInDarkTheme()) nameProp.color("darkTextColor") else nameProp.color(
+                            "lightTextColor"
+                        ),
+                        modifier = Modifier.layoutId(nameProp.id())
+                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
+                        modifier = Modifier.layoutId("infos")
+                    ) {
+                        infos.forEachIndexed { i, info ->
+                            val color = if (i == 0) {
+                                MaterialTheme.colors.background
+                            } else MaterialTheme.colors.onBackground
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(info.icon),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
+                                    tint = color
+                                )
+                                Spacer(modifier = Modifier.width(24.dp))
+                                Text(
+                                    text = info.name,
+                                    style = MaterialTheme.typography.body2,
+                                    color = color
+                                )
+                            }
+                        }
+                    }
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+                        modifier = Modifier.layoutId("description")
+                    ) {
+                        Text(
+                            text = stringResource(R.string.description).uppercase(),
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.onBackground,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = equipment.description,
+                            style = MaterialTheme.typography.body2,
+                            color = MaterialTheme.colors.onBackground.copy(0.7f),
+                            maxLines = 5,
+                            textAlign = TextAlign.Justify,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.layoutId("stepByStep")
+                    ) {
+                        Text(
+                            text = stringResource(R.string.step_by_step).uppercase(),
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.onBackground,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (equipment.instructionsConfig.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                            ) {
+                                Text(
+                                    text = "Step by step not defined",
+                                    style = MaterialTheme.typography.body1,
+                                    color = MaterialTheme.colors.onBackground,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
+                        LazyColumn(
+                            userScrollEnabled = progress == 1f
+                        ) {
+                            itemsIndexed(equipment.instructionsConfig) { i, config ->
+                                ConfigurationItem(
+                                    index = i + 1,
+                                    configurationStep = config,
+                                    enabledClick = animateToEnd
+                                )
+                            }
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .layoutId("seeMore")
+                            .background(MaterialTheme.colors.background)
+                    ) {
+                        if (equipment.instructionsConfig.isNotEmpty()) {
+                            Text(
+                                text = stringResource(R.string.see_more),
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.onBackground,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(8.dp)
+                                    .clickable { animateToEnd = true }
+                                    .padding(4.dp)
                             )
                         }
                     }
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .layoutId("seeMore")
-                    .background(MaterialTheme.colors.background)
-            ) {
-                if (state.configurations.isNotEmpty()) {
-                    Text(
-                        text = stringResource(R.string.see_more),
-                        style = MaterialTheme.typography.body1,
-                        color = MaterialTheme.colors.onBackground,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(8.dp)
-                            .clickable { animateToEnd = true }
-                            .padding(4.dp)
-                    )
-                }
-            }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier
-                    .layoutId("bottomAction")
-                    .height(52.dp)
-                    .clip(RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp))
-                    .background(MaterialTheme.colors.onBackground)
-                    .padding(horizontal = 12.dp)
-            ) {
-                Button(
-                    onClick = { animateToEnd = false },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.background,
-                        contentColor = MaterialTheme.colors.onBackground
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(34.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.see_less),
-                        style = MaterialTheme.typography.body2,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-                bottomInfo.forEach { info ->
-                    Box(
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier
-                            .weight(1f)
-                            .height(34.dp)
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colors.background,
-                                shape = RoundedCornerShape(8.dp)
-                            )
+                            .layoutId("bottomAction")
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp))
+                            .background(MaterialTheme.colors.onBackground)
+                            .padding(horizontal = 12.dp)
                     ) {
-                        Text(
-                            text = info,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colors.background,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                        Button(
+                            onClick = { animateToEnd = false },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = MaterialTheme.colors.background,
+                                contentColor = MaterialTheme.colors.onBackground
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(34.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.see_less),
+                                style = MaterialTheme.typography.body2,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                        bottomInfo.forEach { info ->
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(34.dp)
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colors.background,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                            ) {
+                                Text(
+                                    text = info,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colors.background,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
-
 }

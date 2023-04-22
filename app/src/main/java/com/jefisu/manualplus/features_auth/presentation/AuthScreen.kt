@@ -46,8 +46,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ExperimentalMotionApi
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.BottomSheet
@@ -66,14 +64,9 @@ import com.ramcosta.composedestinations.navigation.navigate
 @Composable
 fun AuthScreen(
     navController: NavController,
-    viewModel: AuthViewModel = hiltViewModel()
+    state: AuthState,
+    onEvent: (AuthEvent) -> Unit
 ) {
-    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
-    val signUpState by viewModel.signUpState.collectAsStateWithLifecycle()
-    val error by viewModel.error.collectAsStateWithLifecycle()
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val isLoadingGoogle by viewModel.isLoadingGoogle.collectAsStateWithLifecycle()
-
     val focusManager = LocalFocusManager.current
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
@@ -91,25 +84,23 @@ fun AuthScreen(
             .decodeToString()
     }
 
-    LaunchedEffect(error, sheetState, viewModel.navigateEvent) {
-        if (error != null) {
+    LaunchedEffect(state.error, sheetState, state.canNavigate) {
+        if (state.error != null) {
             sheetState.show()
         }
         if (!sheetState.isVisible) {
-            viewModel.errorDisplayed()
+            onEvent(AuthEvent.ErrorDisplayed)
         }
-        viewModel.navigateEvent.collect { canNavigate ->
-            if (canNavigate) {
-                navController.backQueue.clear()
-                navController.navigate(HomeScreenDestination)
-            }
+        if (state.canNavigate) {
+            navController.backQueue.clear()
+            navController.navigate(HomeScreenDestination)
         }
     }
 
     BottomSheet(
-        error = error?.asString().orEmpty(),
+        error = state.error?.asString().orEmpty(),
         sheetState = sheetState,
-        onOkClick = viewModel::errorDisplayed
+        onOkClick = { onEvent(AuthEvent.ErrorDisplayed) }
     ) {
         MotionLayout(
             motionScene = MotionScene(content = motionScene),
@@ -137,8 +128,8 @@ fun AuthScreen(
                     )
                     Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                     CustomTextField(
-                        text = signUpState.email,
-                        onTextChange = { viewModel.enteredEmail(it, isSigning = true) },
+                        text = state.emailSignUp,
+                        onTextChange = { onEvent(AuthEvent.EnterEmail(it, true)) },
                         placeholderText = "john.doe@example.com",
                         nameTextField = "Email",
                         iconView = R.drawable.ic_email,
@@ -149,8 +140,8 @@ fun AuthScreen(
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     CustomTextField(
-                        text = signUpState.password,
-                        onTextChange = { viewModel.enteredPassword(it, isSigning = true) },
+                        text = state.passwordSignUp,
+                        onTextChange = { onEvent(AuthEvent.EnterPassword(it, true)) },
                         placeholderText = stringResource(R.string.digit_your_password),
                         nameTextField = stringResource(R.string.password),
                         iconView = R.drawable.ic_lock,
@@ -162,8 +153,8 @@ fun AuthScreen(
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     CustomTextField(
-                        text = signUpState.repeatPassword,
-                        onTextChange = viewModel::enteredName,
+                        text = state.repeatPasswordSignUp,
+                        onTextChange = { onEvent(AuthEvent.EnterRepeatPassword(it)) },
                         placeholderText = stringResource(R.string.repeat_your_password),
                         nameTextField = stringResource(R.string.repeat_password),
                         iconView = R.drawable.ic_lock,
@@ -177,8 +168,8 @@ fun AuthScreen(
                     CustomButton(
                         text = stringResource(R.string.create_account),
                         backgroundIsPrimary = true,
-                        onClick = viewModel::signUp,
-                        isLoading = isLoading
+                        onClick = { onEvent(AuthEvent.SignUp) },
+                        isLoading = state.isLoading && state.showLoadingButton == AuthViewModel.LoadingButton.SignUp
                     )
                 }
             )
@@ -197,8 +188,8 @@ fun AuthScreen(
                     if (!animateToEnd) {
                         Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                         CustomTextField(
-                            text = loginState.email,
-                            onTextChange = { viewModel.enteredEmail(it, isSigning = false) },
+                            text = state.emailSignIn,
+                            onTextChange = { onEvent(AuthEvent.EnterEmail(it, false)) },
                             placeholderText = "john.doe@example.com",
                             nameTextField = "Email",
                             iconView = R.drawable.ic_email,
@@ -207,8 +198,8 @@ fun AuthScreen(
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         CustomTextField(
-                            text = loginState.password,
-                            onTextChange = { viewModel.enteredPassword(it, isSigning = false) },
+                            text = state.passwordSignIn,
+                            onTextChange = { onEvent(AuthEvent.EnterPassword(it, false)) },
                             nameTextField = stringResource(R.string.password),
                             isPassword = true,
                             placeholderText = stringResource(R.string.digit_your_password),
@@ -226,8 +217,8 @@ fun AuthScreen(
                         Spacer(modifier = Modifier.height(20.dp))
                         CustomButton(
                             text = stringResource(R.string.log_in),
-                            isLoading = isLoading,
-                            onClick = viewModel::login
+                            isLoading = state.isLoading && state.showLoadingButton == AuthViewModel.LoadingButton.NormalLogin,
+                            onClick = { onEvent(AuthEvent.LoginEmail) }
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Row(
@@ -255,8 +246,8 @@ fun AuthScreen(
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                         GoogleButton(
-                            onResult = viewModel::loginWithGoogle,
-                            isLoading = isLoadingGoogle
+                            onResult = { onEvent(AuthEvent.LoginGoogle(it)) },
+                            isLoading = state.isLoading && state.showLoadingButton == AuthViewModel.LoadingButton.Google
                         )
                     }
                 }

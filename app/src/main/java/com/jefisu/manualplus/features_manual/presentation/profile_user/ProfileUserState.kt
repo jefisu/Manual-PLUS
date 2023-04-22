@@ -5,10 +5,11 @@ import com.jefisu.manualplus.features_manual.presentation.profile_user.util.Sett
 
 data class ProfileUserState(
     val isLoading: Boolean = false,
-    val name: String = "",
     val supportMessage: String = "",
     val hospitalName: String = "",
     val hospitalAddress: String = "",
     val imagesToUpload: List<Uri> = emptyList(),
     val settings: SettingsUser = SettingsUser.EditProfile,
+    val uiEvent: ProfileUserViewModel.UiEvent? = null,
+    val name: String = ""
 )
