@@ -1,0 +1,200 @@
+{
+  ConstraintSets: {
+    start: {
+      container: {
+        width: 'spread',
+        height: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top', 160],
+        bottom: ['parent', 'bottom'],
+        translationZ: 0,
+        custom: {
+          corner: 100
+        }
+      },
+      navigationIcon: {
+        start: ['parent', 'start', 12],
+        top: ['parent', 'top', 12],
+        translationZ: 0.1,
+        custom: {
+          lightColor: '#E6E1E6',
+          darkColor: '#252033'
+        }
+      },
+      image: {
+        start: ['parent', 'start', 16],
+        top: ['navigationIcon', 'bottom', 16],
+        translationZ: 0.1,
+      },
+      name: {
+        width: 'spread',
+        start: ['image', 'end', 24],
+        end: ['parent', 'end', 12],
+        top: ['image', 'top', 8],
+        translationZ: 0.1,
+        custom: {
+          lightTextColor: '#E6E1E6',
+          darkTextColor: '#252033'
+        }
+      },
+      infos: {
+        width: 'spread',
+        start: ['image', 'end', 24],
+        end: ['parent', 'end', 12],
+        top: ['name', 'bottom', 16],
+        translationZ: 0.1
+      },
+      description: {
+        width: 'spread',
+        start: ['parent', 'start', 16],
+        end: ['parent', 'end', 16],
+        top: ['image', 'bottom', 24],
+        translationZ: 0.1,
+      },
+      stepByStep: {
+        width: 'spread',
+        height: 'spread',
+        start: ['parent', 'start', 16],
+        end: ['parent', 'end', 16],
+        top: ['description', 'bottom', 24],
+        bottom: ['parent', 'bottom'],
+        translationZ: 0.1,
+      },
+      seeMore: {
+        width: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        bottom: ['parent', 'bottom'],
+        translationZ: 0.1
+      },
+      bottomAction: {
+        width: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'bottom'],
+        translationZ: 0,
+      }
+    },
+    end: {
+      container: {
+        width: 'spread',
+        height: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top'],
+        bottom: ['parent', 'bottom'],
+        translationZ: 0.1,
+        custom: {
+          corner: 0
+        }
+      },
+      navigationIcon: {
+        start: ['parent', 'start', 12],
+        top: ['parent', 'top', 12],
+        translationZ: 0.1,
+        custom: {
+          lightColor: '#252033',
+          darkColor: '#E6E1E6',
+        }
+      },
+      image: {
+        start: ['parent', 'start', 16],
+        top: ['navigationIcon', 'bottom', 16],
+        translationZ: 0
+      },
+      name: {
+        width: 'spread',
+        start: ['navigationIcon', 'end', 16],
+        end: ['parent', 'end'],
+        top: ['navigationIcon', 'top'],
+        bottom: ['navigationIcon', 'bottom'],
+        translationZ: 0.1,
+        custom: {
+          lightTextColor: '#252033',
+          darkTextColor: '#E6E1E6'
+        }
+      },
+      infos: {
+        width: 'spread',
+        start: ['image', 'end', 24],
+        end: ['parent', 'end', 12],
+        top: ['image', 'top', 40],
+        translationZ: 0
+      },
+      description: {
+        width: 'spread',
+        start: ['parent', 'start', 16],
+        end: ['parent', 'end', 16],
+        top: ['image', 'bottom', 24],
+        translationZ: 0,
+      },
+      stepByStep: {
+        width: 'spread',
+        height: 'spread',
+        start: ['parent', 'start', 16],
+        end: ['parent', 'end', 16],
+        top: ['navigationIcon', 'bottom', 12],
+        bottom: ['seeMore', 'top', 8],
+        translationZ: 0.1
+      },
+      seeMore: {
+        width: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        bottom: ['parent', 'bottom'],
+        translationZ: 0
+      },
+      bottomAction: {
+        width: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        bottom: ['parent', 'bottom'],
+        translationZ: 0.11
+      }
+    }
+  },
+  Transitions: {
+    default: {
+      from: 'start',
+      to: 'end',
+      KeyFrames: {
+        KeyPositions: [
+          {
+            target: ['image'],
+            frames: [50],
+            percentX: [0],
+            percentY: [-0.30]
+          },
+          {
+            target: ['infos'],
+            frames: [50],
+            percentY: [0]
+          },
+          {
+            target: ['description'],
+            frames: [50],
+            percentX: [-15]
+          },
+          {
+            target: ['seeMore', 'bottomAction'],
+            frames: [50],
+            percentY: [1.05]
+          }
+        ],
+        KeyAttributes: [
+          {
+            target: ['image'],
+            frames: [50],
+            rotationZ: [55]
+          },
+          {
+            target: ['infos'],
+            frames: [50],
+            rotationX: [-25]
+          }
+        ]
+      }
+    }
+  }
+}
