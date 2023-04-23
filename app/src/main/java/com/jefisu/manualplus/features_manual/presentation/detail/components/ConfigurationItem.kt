@@ -169,10 +169,10 @@ fun ConfigurationItem(
                                 .fillMaxWidth()
                                 .height(200.dp)
                                 .padding(start = 32.dp)
-                                .clip(RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(8.dp))
                                 .background(Color.LightGray)
                         ) {
-                            if (imagesUrl.isNotEmpty()) {
+                            if (imagesUrl.size == configItem.imagesRemotePath.size) {
                                 val painter = rememberAsyncImagePainter(
                                     model = ImageRequest.Builder(context)
                                         .data(imagesUrl[i])
@@ -199,7 +199,8 @@ fun ConfigurationItem(
                     if (configItem.attentionText.isNotEmpty()) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                         ) {
                             Text(
                                 text = "$index.${i + 1}.",
