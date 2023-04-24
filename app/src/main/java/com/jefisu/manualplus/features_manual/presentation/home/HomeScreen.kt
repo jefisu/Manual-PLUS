@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -31,6 +30,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -40,12 +43,12 @@ import com.jefisu.manualplus.core.presentation.ui.theme.spacing
 import com.jefisu.manualplus.features_manual.domain.model.User
 import com.jefisu.manualplus.features_manual.presentation.home.components.ListItem
 import com.ramcosta.composedestinations.annotation.Destination
-import java.time.LocalTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
+import java.time.LocalTime
 
 @OptIn(ExperimentalPagerApi::class)
 @Destination
@@ -93,7 +96,20 @@ fun HomeScreen(
             return@Box
         }
         if (state.isLoading || !visibleContent) {
-            CircularProgressIndicator()
+            val lottieComposition by rememberLottieComposition(
+                LottieCompositionSpec.RawRes(R.raw.loading_files_9929)
+            )
+            val progress by animateLottieCompositionAsState(
+                composition = lottieComposition,
+                iterations = Int.MAX_VALUE,
+                isPlaying = true
+            )
+
+            LottieAnimation(
+                composition = lottieComposition,
+                progress = progress,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
 
         CollapsingToolbarScaffold(

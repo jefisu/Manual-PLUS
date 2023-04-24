@@ -27,9 +27,9 @@ private val LightColorPalette = lightColors(
     onSecondary = Color.White,
     error = light_Error,
     onError = Color.White,
-    background = Background,
+    background = Color.White,
     onBackground = on_background,
-    surface = Background,
+    surface = Color.White,
     onSurface = on_background
 )
 
