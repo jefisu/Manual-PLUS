@@ -3,19 +3,24 @@ package com.jefisu.manualplus.features_manual.presentation.detail.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,12 +39,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -48,9 +56,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.ui.theme.light_Primary
 import com.jefisu.manualplus.core.presentation.ui.theme.spacing
@@ -167,30 +182,41 @@ fun ConfigurationItem(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(200.dp)
                                 .padding(start = 32.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color.LightGray)
-                        ) {
-                            if (imagesUrl.size == configItem.imagesRemotePath.size) {
-                                val painter = rememberAsyncImagePainter(
-                                    model = ImageRequest.Builder(context)
-                                        .data(imagesUrl[i])
-                                        .crossfade(true)
-                                        .build()
+                                .background(
+                                    (if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray).copy(0.25f)
                                 )
+                                .animateContentSize()
+                        ) {
+                            var isLoading by remember { mutableStateOf(false) }
+                            val lottieComposition by rememberLottieComposition(
+                                LottieCompositionSpec.RawRes(R.raw.load_fae_2_lottie)
+                            )
+                            val progress by animateLottieCompositionAsState(
+                                composition = lottieComposition,
+                                reverseOnRepeat = true,
+                                iterations = Int.MAX_VALUE,
+                                isPlaying = isLoading
+                            )
 
-                                if (painter.state is AsyncImagePainter.State.Loading) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.align(Alignment.Center),
-                                        color = light_Primary
-                                    )
-                                }
-                                Image(
-                                    painter = painter,
+                            LottieAnimation(
+                                composition = lottieComposition,
+                                progress = progress,
+                                modifier = Modifier
+                                    .size(if (isLoading) 200.dp else 0.dp)
+                                    .align(Alignment.Center)
+                            )
+
+                            if (imagesUrl.size == configItem.imagesRemotePath.size) {
+                                AsyncImage(
+                                    model = imagesUrl[i],
                                     contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.matchParentSize()
+                                    onState = {
+                                        isLoading = it is AsyncImagePainter.State.Loading
+                                    },
+                                    contentScale = ContentScale.FillWidth,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
                         }
