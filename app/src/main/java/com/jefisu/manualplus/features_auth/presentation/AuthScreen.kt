@@ -1,5 +1,6 @@
 package com.jefisu.manualplus.features_auth.presentation
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -7,35 +8,38 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,9 +47,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ExperimentalMotionApi
-import androidx.constraintlayout.compose.MotionLayout
-import androidx.constraintlayout.compose.MotionScene
 import androidx.navigation.NavController
 import com.jefisu.manualplus.R
 import com.jefisu.manualplus.core.presentation.components.BottomSheet
@@ -58,7 +59,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.navigate
 
-@OptIn(ExperimentalMotionApi::class, ExperimentalMaterialApi::class)
+@OptIn(
+    ExperimentalMaterialApi::class, ExperimentalLayoutApi::class,
+    ExperimentalComposeUiApi::class
+)
 @RootNavGraph(start = true)
 @Destination
 @Composable
@@ -67,24 +71,24 @@ fun AuthScreen(
     state: AuthState,
     onEvent: (AuthEvent) -> Unit
 ) {
+    val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 50
     val focusManager = LocalFocusManager.current
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-
-    var animateToEnd by rememberSaveable { mutableStateOf(false) }
-    val progress by animateFloatAsState(
-        targetValue = if (animateToEnd) 1f else 0f,
-        animationSpec = tween(700),
-        label = ""
+    var isSigning by rememberSaveable { mutableStateOf(true) }
+    val percentOffsetY by animateFloatAsState(
+        label = "",
+        targetValue = when {
+            !isSigning -> 0.74f
+            !isSigning && isKeyboardVisible -> 1f
+            else -> 0f
+        },
+        animationSpec = tween(
+            durationMillis = 600,
+            easing = FastOutSlowInEasing
+        )
     )
-    val context = LocalContext.current
-    val motionScene = remember {
-        context.resources
-            .openRawResource(R.raw.auth_screen_motion_scene)
-            .readBytes()
-            .decodeToString()
-    }
 
-    LaunchedEffect(state.error, sheetState, state.canNavigate) {
+    LaunchedEffect(state.error, sheetState, state.canNavigate, isSigning) {
         if (state.error != null) {
             sheetState.show()
         }
@@ -95,6 +99,9 @@ fun AuthScreen(
             navController.backQueue.clear()
             navController.navigate(HomeScreenDestination)
         }
+        if (isKeyboardVisible) {
+            focusManager.clearFocus()
+        }
     }
 
     BottomSheet(
@@ -102,31 +109,23 @@ fun AuthScreen(
         sheetState = sheetState,
         onOkClick = { onEvent(AuthEvent.ErrorDisplayed) }
     ) {
-        MotionLayout(
-            motionScene = MotionScene(content = motionScene),
-            progress = progress,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Image(
-                painter = painterResource(R.drawable.logo),
-                contentDescription = "Logo",
-                modifier = Modifier
-                    .layoutId("logo")
-                    .size(150.dp)
-            )
+        Image(
+            painter = painterResource(R.drawable.logo),
+            contentDescription = "Logo",
+            modifier = Modifier
+                .padding(vertical = MaterialTheme.spacing.large)
+                .size(150.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             BodyClickable(
-                clickEnabled = progress == 0f,
+                titleContainer = stringResource(R.string.sign_up),
+                textColor = MaterialTheme.colors.background,
+                clickEnabled = isSigning,
                 backgroundColor = MaterialTheme.colors.primary,
-                onClick = { animateToEnd = !animateToEnd },
-                modifier = Modifier.layoutId("containerSignUp"),
+                onClick = { isSigning = !isSigning },
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.large),
                 content = {
-                    Text(
-                        text = stringResource(R.string.sign_up),
-                        style = MaterialTheme.typography.h6,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.background
-                    )
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                     CustomTextField(
                         text = state.emailSignUp,
                         onTextChange = { onEvent(AuthEvent.EnterEmail(it, true)) },
@@ -136,9 +135,8 @@ fun AuthScreen(
                         isPrimaryColorBackground = true,
                         imeAction = ImeAction.Next,
                         keyboardAction = { focusManager.moveFocus(FocusDirection.Down) },
-                        readOnly = progress == 0f
+                        readOnly = isSigning
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
                     CustomTextField(
                         text = state.passwordSignUp,
                         onTextChange = { onEvent(AuthEvent.EnterPassword(it, true)) },
@@ -149,9 +147,8 @@ fun AuthScreen(
                         isPassword = true,
                         imeAction = ImeAction.Next,
                         keyboardAction = { focusManager.moveFocus(FocusDirection.Down) },
-                        readOnly = progress == 0f
+                        readOnly = isSigning
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
                     CustomTextField(
                         text = state.repeatPasswordSignUp,
                         onTextChange = { onEvent(AuthEvent.EnterRepeatPassword(it)) },
@@ -162,9 +159,8 @@ fun AuthScreen(
                         isPassword = true,
                         imeAction = ImeAction.Done,
                         keyboardAction = focusManager::clearFocus,
-                        readOnly = progress == 0f
+                        readOnly = isSigning
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
                     CustomButton(
                         text = stringResource(R.string.create_account),
                         backgroundIsPrimary = true,
@@ -174,82 +170,74 @@ fun AuthScreen(
                 }
             )
             BodyClickable(
-                clickEnabled = progress == 1f,
+                titleContainer = stringResource(R.string.log_in),
+                textColor = MaterialTheme.colors.onBackground,
+                clickEnabled = !isSigning,
                 backgroundColor = MaterialTheme.colors.background,
-                onClick = { animateToEnd = !animateToEnd },
-                modifier = Modifier.layoutId("containerLogin"),
+                onClick = { isSigning = !isSigning },
+                verticalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = maxHeight * percentOffsetY)
+                    .padding(top = MaterialTheme.spacing.extraLarge),
                 content = {
-                    Text(
-                        text = stringResource(R.string.log_in),
-                        style = MaterialTheme.typography.h6,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.onBackground
+                    CustomTextField(
+                        text = state.emailSignIn,
+                        onTextChange = { onEvent(AuthEvent.EnterEmail(it, false)) },
+                        placeholderText = "john.doe@example.com",
+                        nameTextField = "Email",
+                        iconView = R.drawable.ic_email,
+                        imeAction = ImeAction.Next,
+                        keyboardAction = { focusManager.moveFocus(FocusDirection.Down) }
                     )
-                    if (!animateToEnd) {
-                        Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
-                        CustomTextField(
-                            text = state.emailSignIn,
-                            onTextChange = { onEvent(AuthEvent.EnterEmail(it, false)) },
-                            placeholderText = "john.doe@example.com",
-                            nameTextField = "Email",
-                            iconView = R.drawable.ic_email,
-                            imeAction = ImeAction.Next,
-                            keyboardAction = { focusManager.moveFocus(FocusDirection.Down) }
+                    CustomTextField(
+                        text = state.passwordSignIn,
+                        onTextChange = { onEvent(AuthEvent.EnterPassword(it, false)) },
+                        nameTextField = stringResource(R.string.password),
+                        isPassword = true,
+                        placeholderText = stringResource(R.string.digit_your_password),
+                        iconView = R.drawable.ic_lock,
+                        imeAction = ImeAction.Done,
+                        keyboardAction = focusManager::clearFocus
+                    )
+                    Text(
+                        text = stringResource(R.string.forgot_password),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colors.onBackground,
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                    CustomButton(
+                        text = stringResource(R.string.log_in),
+                        isLoading = state.isLoading && state.showLoadingButton == AuthViewModel.LoadingButton.NormalLogin,
+                        onClick = { onEvent(AuthEvent.LoginEmail) }
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(1.5.dp)
+                                .background(MaterialTheme.colors.onBackground)
                         )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        CustomTextField(
-                            text = state.passwordSignIn,
-                            onTextChange = { onEvent(AuthEvent.EnterPassword(it, false)) },
-                            nameTextField = stringResource(R.string.password),
-                            isPassword = true,
-                            placeholderText = stringResource(R.string.digit_your_password),
-                            iconView = R.drawable.ic_lock,
-                            imeAction = ImeAction.Done,
-                            keyboardAction = focusManager::clearFocus
-                        )
-                        Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = stringResource(R.string.forgot_password),
-                            fontSize = 12.sp,
+                            text = stringResource(R.string.or),
+                            style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.onBackground,
-                            modifier = Modifier.align(Alignment.End)
                         )
-                        Spacer(modifier = Modifier.height(20.dp))
-                        CustomButton(
-                            text = stringResource(R.string.log_in),
-                            isLoading = state.isLoading && state.showLoadingButton == AuthViewModel.LoadingButton.NormalLogin,
-                            onClick = { onEvent(AuthEvent.LoginEmail) }
-                        )
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(1.5.dp)
-                                    .background(MaterialTheme.colors.onBackground)
-                            )
-                            Text(
-                                text = stringResource(R.string.or),
-                                style = MaterialTheme.typography.body1,
-                                color = MaterialTheme.colors.onBackground,
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(1.5.dp)
-                                    .background(MaterialTheme.colors.onBackground)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(20.dp))
-                        GoogleButton(
-                            onResult = { onEvent(AuthEvent.LoginGoogle(it)) },
-                            isLoading = state.isLoading && state.showLoadingButton == AuthViewModel.LoadingButton.Google
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(1.5.dp)
+                                .background(MaterialTheme.colors.onBackground)
                         )
                     }
+                    GoogleButton(
+                        onResult = { onEvent(AuthEvent.LoginGoogle(it)) },
+                        isLoading = state.isLoading && state.showLoadingButton == AuthViewModel.LoadingButton.Google
+                    )
                 }
             )
         }
@@ -258,33 +246,44 @@ fun AuthScreen(
 
 @Composable
 private fun BodyClickable(
+    titleContainer: String,
+    textColor: Color,
     clickEnabled: Boolean,
     backgroundColor: Color,
     onClick: () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top
 ) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-            .background(backgroundColor)
-            .then(modifier)
+    Surface(
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+        color = backgroundColor,
+        modifier = modifier.fillMaxSize()
     ) {
-        Column(
-            content = content,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    top = 24.dp,
-                    start = 32.dp,
-                    end = 32.dp
+        Box {
+            Column(
+                verticalArrangement = verticalArrangement,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        horizontal = MaterialTheme.spacing.large,
+                        vertical = 24.dp
+                    )
+            ) {
+                Text(
+                    text = titleContainer,
+                    style = MaterialTheme.typography.h6,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
                 )
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(if (clickEnabled) 1f else 0f)
-                .height(if (clickEnabled) 80.dp else 0.dp)
-                .clickable(onClick = onClick)
-        )
+                content()
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(if (clickEnabled) 1f else 0f)
+                    .height(if (clickEnabled) 80.dp else 0.dp)
+                    .clickable(onClick = onClick)
+            )
+        }
     }
 }

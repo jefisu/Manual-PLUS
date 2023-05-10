@@ -1,6 +1,7 @@
 package com.jefisu.manualplus.core.presentation.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,7 +27,7 @@ fun BottomSheet(
     error: String,
     sheetState: ModalBottomSheetState,
     onOkClick: () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable ColumnScope.() -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -59,6 +60,8 @@ fun BottomSheet(
             }
         }
     ) {
-        content()
+        Column {
+            content()
+        }
     }
 }

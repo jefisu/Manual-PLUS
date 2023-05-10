@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.LaunchedEffect
@@ -11,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -63,6 +66,7 @@ class MainActivity : ComponentActivity() {
             isLoading
         }
         cleanupCheck()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val mainViewModel = hiltViewModel<MainViewModel>()
             val user by mainViewModel.user.collectAsStateWithLifecycle()
@@ -79,7 +83,10 @@ class MainActivity : ComponentActivity() {
                     DestinationsNavHost(
                         navGraph = NavGraphs.root,
                         startRoute = getStartScreen(),
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .navigationBarsPadding()
+                            .statusBarsPadding()
                     ) {
                         composable(AuthScreenDestination) {
                             val viewModel = hiltViewModel<AuthViewModel>()
